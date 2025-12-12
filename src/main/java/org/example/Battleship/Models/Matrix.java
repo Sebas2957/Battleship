@@ -9,6 +9,7 @@ import java.util.*;
  *
  * @author Javier Giraldo
  * @author Sebastian Niño
+ * @author Pablo Arias
  * @version 1.0
  */
 public class Matrix implements Serializable {

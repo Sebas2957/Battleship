@@ -22,7 +22,6 @@ public class HelloApplication extends Application {
         stage.show();
     }
 
-    // El main integrado - ya no necesitas Launcher separado
     public static void main(String[] args) {
         launch(args);
     }

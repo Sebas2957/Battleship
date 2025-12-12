@@ -28,6 +28,7 @@ import java.io.IOException;
  *
  * @author Javier Giraldo
  * @author Sebastian Niño
+ * @author Pablo Arias
  * @version 1.0
  */
 public class PlacementController {

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" spacing="15.0" style="-fx-background-color: linear-gradient(to bottom, #1a1a2e, #16213e); -fx-border-width: 5px; -fx-border-color: #0f3460; -fx-border-radius: 10;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.Battleship.Controllers.InformationController">
+    <padding>
+        <Insets left="40.0" right="40.0" top="30.0" bottom="30.0" />
+    </padding>
+
+    <Label fx:id="welcomeText" alignment="CENTER" text="BATALLA NAVAL" textAlignment="CENTER" textFill="#00d4ff">
+        <font>
+            <Font name="System Bold" size="36.0" />
+        </font>
+    </Label>
+
+    <Label alignment="CENTER" text="¡Hunde la flota enemiga!" textAlignment="CENTER" textFill="#e94560">
+        <font>
+            <Font name="System Bold Italic" size="18.0" />
+        </font>
+    </Label>
+
+    <VBox alignment="CENTER" spacing="8.0" style="-fx-background-color: rgba(15, 52, 96, 0.6); -fx-background-radius: 10; -fx-border-color: #00d4ff; -fx-border-width: 2; -fx-border-radius: 10;">
+        <padding>
+            <Insets top="15.0" bottom="15.0" left="20.0" right="20.0" />
+        </padding>
+
+        <Label text="📋 REGLAS DEL JUEGO" textFill="#00d4ff" textAlignment="CENTER">
+            <font>
+                <Font name="System Bold" size="20.0" />
+            </font>
+        </Label>
+
+        <Label text="🎯 Coloca tus 10 barcos en el tablero" textFill="WHITE" wrapText="true" maxWidth="400">
+            <font>
+                <Font size="14.0" />
+            </font>
+        </Label>
+
+        <Label text="💧 Agua (X): Pierdes el turno" textFill="WHITE" wrapText="true" maxWidth="400">
+            <font>
+                <Font size="14.0" />
+            </font>
+        </Label>
+
+        <Label text="💥 Tocado: ¡Vuelves a disparar!" textFill="WHITE" wrapText="true" maxWidth="400">
+            <font>
+                <Font size="14.0" />
+            </font>
+        </Label>
+
+        <Label text="🔥 Hundido: ¡Sigue atacando!" textFill="WHITE" wrapText="true" maxWidth="400">
+            <font>
+                <Font size="14.0" />
+            </font>
+        </Label>
+
+        <Label text="🏆 ¡Hunde los 10 barcos enemigos para ganar!" textFill="#00ff88" wrapText="true" maxWidth="400">
+            <font>
+                <Font name="System Bold" size="15.0" />
+            </font>
+        </Label>
+    </VBox>
+
+    <VBox alignment="CENTER" spacing="12.0">
+        <VBox.margin>
+            <Insets top="10.0" />
+        </VBox.margin>
+
+        <Button mnemonicParsing="false" onAction="#onPlayButton" prefWidth="280.0" prefHeight="50.0" style="-fx-background-color: linear-gradient(to right, #e94560, #ff6b9d); -fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-border-color: white; -fx-border-width: 2; -fx-border-radius: 10; -fx-cursor: hand;" text="🚀 NUEVA PARTIDA">
+            <font>
+                <Font name="System Bold" size="18.0" />
+            </font>
+        </Button>
+
+        <Button mnemonicParsing="false" onAction="#onInformationButton" prefWidth="280.0" prefHeight="45.0" style="-fx-background-color: linear-gradient(to right, #00d4ff, #0077b6); -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-border-color: white; -fx-border-width: 2; -fx-border-radius: 10; -fx-cursor: hand;" text="📖 INSTRUCCIONES DETALLADAS">
+            <font>
+                <Font name="System Bold" size="16.0" />
+            </font>
+        </Button>
+    </VBox>
+
+    <Label alignment="CENTER" text="Desarrollado para FPOE - Mini Proyecto 4" textFill="#888888" textAlignment="CENTER">
+        <font>
+            <Font size="11.0" />
+        </font>
+        <VBox.margin>
+            <Insets top="15.0" />
+        </VBox.margin>
+    </Label>
+</VBox>

@@ -8,6 +8,7 @@ import java.io.Serializable;
  *
  * @author Javier Giraldo
  * @author Sebastian Niño
+ * @Pablo Arias
  * @version 1.0
  */
 public class Game implements Serializable {
