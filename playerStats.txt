@@ -1,0 +1,6 @@
+ESTADÍSTICAS DEL JUEGO
+======================
+Jugador: seatz
+Barcos hundidos del jugador: 0
+Barcos hundidos de la máquina: 0
+Total de barcos: 10

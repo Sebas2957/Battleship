@@ -50,6 +50,9 @@ public class InformationView {
      * Shows the main menu window.
      */
     public void show() {
+        // Ajustar al tamaño de la escena y centrar en pantalla antes/después de mostrar
+        stage.sizeToScene();
         stage.show();
+        stage.centerOnScreen();
     }
 }
