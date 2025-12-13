@@ -1,5 +1,6 @@
 package org.example.Battleship.Controllers;
 
+import javafx.scene.Node;
 import org.example.Battleship.Models.Matrix;
 import org.example.Battleship.Models.Ship;
 import org.example.Battleship.Views.GameView;
@@ -139,21 +140,38 @@ public class PlacementController {
 
             isDragging = true;
 
-            int positionFixX = (positionX / CELL_SIZE) * CELL_SIZE;
-            int positionFixY = (positionY / CELL_SIZE) * CELL_SIZE;
+            // Calcular la celda objetivo (índices i, j)
+            int cellX = positionX / CELL_SIZE;
+            int cellY = positionY / CELL_SIZE;
 
-            movementValid = playerBoard.validatePosition(positionX / CELL_SIZE, positionY / CELL_SIZE, targetShip);
+            // Calcular la posición ajustada a la cuadrícula
+            int positionFixX = cellX * CELL_SIZE;
+            int positionFixY = cellY * CELL_SIZE;
+
+            // 1. Validar la posición (usando la posición fija)
+            movementValid = playerBoard.validatePosition(cellX, cellY, targetShip);
+
+            // 2. Obtener dimensiones del barco en píxeles
+            // Nota: Se utiliza getWidth/getHeight de Ship que manejan la rotación
+            int shipWidth = targetShip.getWidth() * CELL_SIZE;
+            int shipHeight = targetShip.getHeight() * CELL_SIZE;
+
+            // 3. Limitar (clampear) la posición fija para que el barco no se salga del AnchorPane (400x400)
+            // Esto asegura que el barco siempre esté visible, independientemente de la validez.
+            double newLayoutX = Math.max(0, Math.min(positionFixX, GRID_SIZE - shipWidth));
+            double newLayoutY = Math.max(0, Math.min(positionFixY, GRID_SIZE - shipHeight));
+
+            // 4. Aplicar posición y coloreado
+            this.targetPath.setLayoutX(newLayoutX);
+            this.targetPath.setLayoutY(newLayoutY);
 
             if (movementValid) {
-                this.targetPath.setLayoutX(positionFixX);
-                this.targetPath.setLayoutY(positionFixY);
                 this.targetPath.setStroke(Color.web("#40bf44"));
                 this.targetPath.setFill(Color.rgb(64, 191, 68, 0.05));
             } else {
-                this.targetPath.setLayoutX(event.getX());
-                this.targetPath.setLayoutY(event.getY());
-                this.targetPath.setStroke(Color.web("#00f"));
-                this.targetPath.setFill(Color.rgb(0, 0, 255, 0.05));
+                // Barco rojo cuando no es una posición válida
+                this.targetPath.setStroke(Color.web("#f00"));
+                this.targetPath.setFill(Color.rgb(255, 0, 0, 0.05));
             }
         } catch (Exception ignored) {}
     }
@@ -166,8 +184,9 @@ public class PlacementController {
      */
     public void handleMouseReleased(MouseEvent event) {
         try {
-            this.targetPath.setStroke(Color.web("#00f"));
-            this.targetPath.setFill(Color.rgb(0, 0, 255, 0.05));
+            // Color final del barco (Rojo)
+            this.targetPath.setStroke(Color.web("#f00"));
+            this.targetPath.setFill(Color.rgb(255, 0, 0, 0.05));
 
             if (isDragging) {
                 int positionX = (int) (this.targetPath.getLayoutX() / CELL_SIZE);
@@ -241,7 +260,8 @@ public class PlacementController {
             label.setAlignment(Pos.CENTER);
             label.setStyle("-fx-font-size: 18px;");
 
-            AnchorPane.setLeftAnchor(label, i * 40.0);
+            // La etiqueta 'A' (i=0) debe empezar en la posición 0.0 de columnsPane
+            AnchorPane.setLeftAnchor((Node) label, (double) (i * CELL_SIZE));
             AnchorPane.setTopAnchor(label, 0.0);
             columnsPane.getChildren().add(label);
 
@@ -251,8 +271,9 @@ public class PlacementController {
             label.setAlignment(Pos.CENTER);
             label.setStyle("-fx-font-size: 18px;");
 
-            AnchorPane.setLeftAnchor(label, 0.0);
-            AnchorPane.setTopAnchor(label, i * 40.0);
+            // Desplazamiento vertical para dejar espacio a las letras (ESTO SE MANTIENE CORRECTO)
+            AnchorPane.setRightAnchor(label, 0.0);
+            AnchorPane.setTopAnchor((Node) label, (double) ((i + 1) * CELL_SIZE));
             rowsPane.getChildren().add(label);
         }
     }
@@ -271,8 +292,9 @@ public class PlacementController {
             path.setLayoutX(ship.getTailX() * CELL_SIZE);
             path.setLayoutY(ship.getTailY() * CELL_SIZE);
             path.setStrokeWidth(2);
-            path.setStroke(Color.web("#00f"));
-            path.setFill(Color.rgb(0, 0, 255, 0.05));
+            // Color de barco inicial (Rojo)
+            path.setStroke(Color.web("#f00"));
+            path.setFill(Color.rgb(255, 0, 0, 0.05));
 
             if (ship.getDirection() == Ship.Direction.VERTICAL) {
                 Rotate rotate = new Rotate(90, 20, 20);

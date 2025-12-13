@@ -1,59 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<VBox alignment="CENTER" spacing="15" style="-fx-background-color: linear-gradient(to bottom, #1a1a2e, #16213e);"
-      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.example.Battleship.Controllers.PlacementController">
-    <padding>
-        <Insets bottom="20" left="20" right="20" top="20"/>
-    </padding>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="705.0" prefWidth="1337.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.Battleship.Controllers.PlacementController">
+    <children>
+        <ImageView fitHeight="714.0" fitWidth="1337.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+                <Image url="@imagenes/Pirate_Game_Table_Top_View.png" />
+            </image>
+        </ImageView>
 
-    <Label text="COLOCA TUS BARCOS" textFill="#00d4ff">
-        <font>
-            <Font name="System Bold" size="28"/>
-        </font>
-    </Label>
+        <VBox alignment="CENTER" layoutX="231.0" layoutY="14.0" prefHeight="490.0" prefWidth="843.0" spacing="10">
+            <children>
+                <Label text="Arrastra los barcos para posicionarlos" textFill="WHITE">
+                    <font>
+                        <Font name="System Bold" size="28.0" />
+                    </font>
+                    <effect>
+                        <javafx.scene.effect.DropShadow color="#000000" radius="3" />
+                    </effect>
+                </Label>
 
-    <Label text="Arrastra para mover • Clic para rotar" textFill="#888888">
-        <font>
-            <Font size="12"/>
-        </font>
-    </Label>
+                <Label text="Clic para rotar • Arrastra para mover" textFill="#cccccc">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Label>
 
-    <HBox alignment="CENTER" spacing="10">
-        <Label text="Tu nombre:" textFill="WHITE">
-            <font>
-                <Font size="14"/>
-            </font>
-        </Label>
-        <TextField fx:id="textFieldName" promptText="Ingresa tu nombre" prefWidth="200"/>
-    </HBox>
+                <HBox alignment="CENTER" spacing="15">
+                    <VBox.margin>
+                        <Insets bottom="10.0" top="5.0" />
+                    </VBox.margin>
+                    <Label text="Capitán:" textFill="WHITE">
+                        <font>
+                            <Font name="System Bold" size="16.0" />
+                        </font>
+                    </Label>
+                    <TextField fx:id="textFieldName" prefHeight="35" prefWidth="220" promptText="Ingresa tu nombre" style="-fx-background-color: rgba(255,255,255,0.9); -fx-background-radius: 5; -fx-font-size: 14px;" />
+                </HBox>
 
-    <HBox alignment="CENTER" spacing="20">
-        <!-- Etiquetas de filas (números) -->
-        <AnchorPane fx:id="rowsPane" prefHeight="400" prefWidth="40"/>
+                <HBox alignment="CENTER" spacing="15">
+                    <AnchorPane fx:id="rowsPane" prefHeight="400.0" prefWidth="35.0" />
 
-        <VBox alignment="CENTER">
-            <AnchorPane fx:id="columnsPane" prefHeight="40" prefWidth="400"/>
-            <AnchorPane fx:id="panePosition" prefHeight="400" prefWidth="400"
-                        style="-fx-background-color: #0a1628; -fx-border-color: #00d4ff; -fx-border-width: 2;"/>
+                    <VBox alignment="CENTER">
+                        <AnchorPane fx:id="columnsPane" prefHeight="35.0" prefWidth="400.0" />
+                        <AnchorPane fx:id="panePosition" prefHeight="400.0" prefWidth="400.0" style="-fx-background-color: rgba(10, 30, 60, 0.85); -fx-border-color: #d4af37; -fx-border-width: 3; -fx-border-radius: 5; -fx-background-radius: 5;" />
+                    </VBox>
+                </HBox>
+
+                <HBox alignment="CENTER" spacing="20">
+                    <VBox.margin>
+                        <Insets top="10.0" />
+                    </VBox.margin>
+
+                    <Button onAction="#onActionPlayButton" prefHeight="45.0" prefWidth="200.0" style="-fx-background-color: linear-gradient(to bottom, #8B4513, #654321); -fx-text-fill: #FFD700; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-border-color: #d4af37; -fx-border-width: 2; -fx-border-radius: 8; -fx-cursor: hand;" text="⚔ INICIAR BATALLA">
+                        <font>
+                            <Font name="System Bold" size="16.0" />
+                        </font>
+                    </Button>
+
+                    <Button onAction="#onActionMachineView" prefHeight="45.0" prefWidth="220.0" style="-fx-background-color: linear-gradient(to bottom, #2F4F4F, #1a3a3a); -fx-text-fill: #87CEEB; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-border-color: #5F9EA0; -fx-border-width: 2; -fx-border-radius: 8; -fx-cursor: hand;" text="🔭 VER TABLERO ENEMIGO">
+                        <font>
+                            <Font name="System Bold" size="14.0" />
+                        </font>
+                    </Button>
+                </HBox>
+            </children>
         </VBox>
-    </HBox>
-
-    <HBox alignment="CENTER" spacing="15">
-        <Button onAction="#onActionPlayButton" prefWidth="180" prefHeight="40"
-                style="-fx-background-color: linear-gradient(to right, #e94560, #ff6b9d); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;"
-                text="🎮 JUGAR"/>
-        <Button onAction="#onActionMachineView" prefWidth="180" prefHeight="40"
-                style="-fx-background-color: linear-gradient(to right, #00d4ff, #0077b6); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;"
-                text="👁 VER TABLERO MÁQUINA"/>
-    </HBox>
-</VBox>
+    </children>
+</AnchorPane>

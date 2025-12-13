@@ -49,6 +49,9 @@ public class GameView {
      * Shows the game window.
      */
     public void show() {
+        // Ajustar al tamaño de la escena y centrar en pantalla para evitar ventanas desubicadas
+        stage.sizeToScene();
         stage.show();
+        stage.centerOnScreen();
     }
 }
