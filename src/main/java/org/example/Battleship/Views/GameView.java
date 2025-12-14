@@ -13,6 +13,7 @@ import java.io.IOException;
  *
  * @author Javier Giraldo
  * @author Sebastian Niño
+ * @author Pablo Arias
  * @version 1.0
  */
 public class GameView {
@@ -41,7 +42,7 @@ public class GameView {
 
         stage = new Stage();
         stage.setTitle("Batalla Naval - Juego");
-        stage.setScene(new Scene(root, 900, 500));
+        stage.setScene(new Scene(root, 1000, 520));
         stage.setResizable(false);
     }
 
@@ -49,6 +50,8 @@ public class GameView {
      * Shows the game window.
      */
     public void show() {
+        stage.sizeToScene();
         stage.show();
+        stage.centerOnScreen();
     }
 }

@@ -8,15 +8,14 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 /**
- * Clase principal de la aplicación Battleship.
- * Combina el lanzador y la aplicación JavaFX.
+ * Initializer - It opens the information-view.
  */
 public class HelloApplication extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("information-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 800, 600);
+        Scene scene = new Scene(fxmlLoader.load(), 725, 700);
         stage.setTitle("Battleship");
         stage.setScene(scene);
         stage.show();

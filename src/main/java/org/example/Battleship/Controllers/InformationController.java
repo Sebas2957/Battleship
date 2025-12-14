@@ -8,6 +8,7 @@ import org.example.Battleship.Views.AlertBox;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
@@ -33,6 +34,15 @@ public class InformationController {
     @FXML
     private Label welcomeText;
 
+    @FXML
+    private Button btnNuevaPartida;
+
+    @FXML
+    private Button btnComoJugar;
+
+    @FXML
+    private Button btnCargarPartida;
+
     /**
      * Initializes the controller.
      * Runs automatically after loading the FXML.
@@ -40,7 +50,37 @@ public class InformationController {
     @FXML
     public void initialize() {
         serialization = new serialization();
-        checkAndLoadGame();
+        updateLoadGameButtonState();
+    }
+
+    /**
+     * Updates the load game button state based on saved game availability.
+     */
+    private void updateLoadGameButtonState() {
+        if (btnCargarPartida == null) return;
+
+        String relativePath = serialization.getRelativePath();
+        File saveFile = new File(relativePath);
+        boolean hasSave = false;
+
+        if (saveFile.exists() && saveFile.length() > 0) {
+            try {
+                List<Object> objects = serialization.deserializeObjects(relativePath);
+                if (objects.size() >= 2) {
+                    Matrix tempMachine = (Matrix) objects.get(0);
+                    Matrix tempPlayer = (Matrix) objects.get(1);
+
+                    // Solo hay partida válida si el juego no ha terminado
+                    hasSave = !tempMachine.allShipsSunk() && !tempPlayer.allShipsSunk();
+                }
+            } catch (Exception e) {
+                hasSave = false;
+            }
+        }
+
+        // Deshabilitar botón si no hay partida guardada
+        btnCargarPartida.setDisable(!hasSave);
+        btnCargarPartida.setOpacity(hasSave ? 1.0 : 0.5);
     }
 
     /**
@@ -62,6 +102,40 @@ public class InformationController {
                         "¡Hunde toda la flota enemiga para ganar!",
                 Alert.AlertType.INFORMATION
         );
+    }
+
+    /**
+     * Handles the load game button event.
+     * Loads a previously saved game.
+     *
+     * @param event Button action event
+     */
+    @FXML
+    void onLoadGameButton(ActionEvent event) {
+        String relativePath = serialization.getRelativePath();
+        File saveFile = new File(relativePath);
+
+        // Verificar si existe archivo de guardado
+        if (!saveFile.exists() || saveFile.length() == 0) {
+            new AlertBox().showAlert(
+                    "Sin Partida Guardada",
+                    "No hay partida guardada",
+                    "No se encontró ninguna partida guardada. ¡Comienza una nueva aventura!",
+                    Alert.AlertType.INFORMATION
+            );
+            return;
+        }
+
+        // Confirmar carga
+        AlertBox alertBox = new AlertBox();
+        boolean confirmed = alertBox.showConfirmation(
+                "Cargar Partida",
+                "Se encontró una partida guardada. ¿Deseas continuar donde lo dejaste?"
+        );
+
+        if (confirmed) {
+            loadGame();
+        }
     }
 
     /**
@@ -127,7 +201,7 @@ public class InformationController {
             try {
                 PlacementView placementView = new PlacementView();
                 placementView.show();
-                ((Stage) welcomeText.getScene().getWindow()).close();
+                closeCurrentWindow();
             } catch (IOException e) {
                 System.err.println("Error al abrir la vista de colocación: " + e.getMessage());
                 e.printStackTrace();
@@ -154,9 +228,7 @@ public class InformationController {
                 // Abrir la vista de juego con los tableros cargados
                 GameView gameView = new GameView(machineBoard, playerBoard);
                 gameView.show();
-
-                Stage stage = (Stage) welcomeText.getScene().getWindow();
-                stage.close();
+                closeCurrentWindow();
             } else {
                 throw new IllegalStateException("Archivo de guardado corrupto");
             }
@@ -173,6 +245,26 @@ public class InformationController {
         } catch (Exception e) {
             System.err.println("Error inesperado al cargar: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Closes the current window safely.
+     */
+    private void closeCurrentWindow() {
+        Stage currentStage = null;
+
+        // Intentar obtener el Stage de cualquier componente visible
+        if (welcomeText != null && welcomeText.getScene() != null) {
+            currentStage = (Stage) welcomeText.getScene().getWindow();
+        } else if (btnNuevaPartida != null && btnNuevaPartida.getScene() != null) {
+            currentStage = (Stage) btnNuevaPartida.getScene().getWindow();
+        } else if (btnCargarPartida != null && btnCargarPartida.getScene() != null) {
+            currentStage = (Stage) btnCargarPartida.getScene().getWindow();
+        }
+
+        if (currentStage != null) {
+            currentStage.close();
         }
     }
 }

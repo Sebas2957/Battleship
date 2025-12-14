@@ -1,5 +1,8 @@
 package org.example.Battleship.Models;
 
+import org.example.Battleship.Models.factories.ShipFactory;
+import org.example.Battleship.Models.structures.ShotQueue;
+
 import java.io.Serializable;
 import java.util.*;
 
@@ -29,14 +32,18 @@ public class Matrix implements Serializable {
 
     private final ArrayList<ArrayList<State>> board = new ArrayList<>();
     private final List<Ship> ships = new ArrayList<>();
+    private final ShotQueue shotHistory; // Estructura de datos: Cola
     private final int BOARD_SIZE = 10;
     private String username;
     private int sunkShips;
 
     /**
-     * Constructor that initializes empty board and places ships randomly.
+     * Constructor: creates board and places ships randomly.
      */
     public Matrix() {
+        // Crear cola para historial de disparos
+        shotHistory = new ShotQueue();
+
         // Inicializar tablero vacío
         for (int i = 0; i < BOARD_SIZE; i++) {
             board.add(new ArrayList<>());
@@ -45,14 +52,13 @@ public class Matrix implements Serializable {
             }
         }
 
-        // Inicializar flota: 1 portaaviones, 2 submarinos, 3 destructores, 4 fragatas
-        initializeShips();
+        // Usar Factory para crear la flota (Patrón Factory)
+        ships.addAll(ShipFactory.createFleet());
 
         // Colocar barcos aleatoriamente
-        final Random random = new Random();
-        int x, y;
-
+        Random random = new Random();
         for (Ship ship : ships) {
+            int x, y;
             do {
                 x = random.nextInt(BOARD_SIZE);
                 y = random.nextInt(BOARD_SIZE);
@@ -65,64 +71,43 @@ public class Matrix implements Serializable {
     }
 
     /**
-     * Initializes the fleet according to game specifications.
-     */
-    public void initializeShips() {
-        Map<Ship.Type, Integer> shipTypes = new HashMap<>();
-        shipTypes.put(Ship.Type.CARRIER, 1);      // 1 portaaviones
-        shipTypes.put(Ship.Type.SUBMARINE, 2);    // 2 submarinos
-        shipTypes.put(Ship.Type.DESTROYER, 3);    // 3 destructores
-        shipTypes.put(Ship.Type.FRIGATE, 4);      // 4 fragatas
-
-        for (Map.Entry<Ship.Type, Integer> entry : shipTypes.entrySet()) {
-            for (int i = 0; i < entry.getValue(); i++) {
-                ships.add(new Ship(entry.getKey()));
-            }
-        }
-    }
-
-    /**
-     * Places a ship on the board at specified coordinates.
+     * Places a ship on the board.
      *
-     * @param x X coordinate (column)
-     * @param y Y coordinate (row)
+     * @param x Column (0-9)
+     * @param y Row (0-9)
      * @param ship Ship to place
-     * @return true if placed successfully, false if position invalid
+     * @return true if placed successfully
      */
     public boolean putShip(int x, int y, Ship ship) {
-        Ship.Direction direction = ship.getDirection();
-        int length = ship.getLength();
-        int c, r;
-
         if (validatePosition(x, y, ship)) {
-            for (int i = 0; i < length; i++) {
-                r = direction == Ship.Direction.VERTICAL ? y + i : y;
-                c = direction == Ship.Direction.HORIZONTAL ? x + i : x;
+            Ship.Direction direction = ship.getDirection();
+            int length = ship.getLength();
 
+            for (int i = 0; i < length; i++) {
+                int r = direction == Ship.Direction.VERTICAL ? y + i : y;
+                int c = direction == Ship.Direction.HORIZONTAL ? x + i : x;
                 board.get(r).set(c, State.OCCUPIED);
             }
             return true;
         }
-
         return false;
     }
 
     /**
-     * Validates if a ship can be placed at the specified position.
+     * Validates if a ship can be placed at a position.
      *
-     * @param x X coordinate
-     * @param y Y coordinate
+     * @param x Column
+     * @param y Row
      * @param ship Ship to validate
-     * @return true if position is valid, false otherwise
+     * @return true if position is valid
      */
     public boolean validatePosition(int x, int y, Ship ship) {
         Ship.Direction direction = ship.getDirection();
         int length = ship.getLength();
-        int c, r;
 
         for (int i = 0; i < length; i++) {
-            r = direction == Ship.Direction.VERTICAL ? y + i : y;
-            c = direction == Ship.Direction.HORIZONTAL ? x + i : x;
+            int r = direction == Ship.Direction.VERTICAL ? y + i : y;
+            int c = direction == Ship.Direction.HORIZONTAL ? x + i : x;
 
             // Verificar límites del tablero
             if (c >= BOARD_SIZE || r >= BOARD_SIZE || c < 0 || r < 0) {
@@ -134,35 +119,32 @@ public class Matrix implements Serializable {
                 return false;
             }
         }
-
         return true;
     }
 
     /**
      * Removes a ship from the board.
      *
-     * @param x X coordinate
-     * @param y Y coordinate
+     * @param x Column
+     * @param y Row
      * @param ship Ship to remove
      */
     public void removeShip(int x, int y, Ship ship) {
         Ship.Direction direction = ship.getDirection();
         int length = ship.getLength();
-        int c, r;
 
         for (int i = 0; i < length; i++) {
-            r = direction == Ship.Direction.VERTICAL ? y + i : y;
-            c = direction == Ship.Direction.HORIZONTAL ? x + i : x;
-
+            int r = direction == Ship.Direction.VERTICAL ? y + i : y;
+            int c = direction == Ship.Direction.HORIZONTAL ? x + i : x;
             board.get(r).set(c, State.EMPTY);
         }
     }
 
     /**
-     * Gets the state of a specific cell.
+     * Gets the state of a cell.
      *
-     * @param x X coordinate
-     * @param y Y coordinate
+     * @param x Column
+     * @param y Row
      * @return Cell state
      */
     public State getState(int x, int y) {
@@ -172,8 +154,8 @@ public class Matrix implements Serializable {
     /**
      * Changes the state of a cell.
      *
-     * @param x X coordinate
-     * @param y Y coordinate
+     * @param x Column
+     * @param y Row
      * @param newState New state
      */
     public void changeState(int x, int y, State newState) {
@@ -181,10 +163,10 @@ public class Matrix implements Serializable {
     }
 
     /**
-     * Checks if a cell has already been shot (water, hit or sunk).
+     * Checks if a cell has already been shot.
      *
-     * @param x X coordinate
-     * @param y Y coordinate
+     * @param x Column
+     * @param y Row
      * @return true if already shot
      */
     public boolean isWaterHitOrSunk(int x, int y) {
@@ -193,10 +175,10 @@ public class Matrix implements Serializable {
     }
 
     /**
-     * Checks if a cell is in HIT or SUNK state.
+     * Checks if a cell has a hit or sunk ship.
      *
-     * @param x X coordinate
-     * @param y Y coordinate
+     * @param x Column
+     * @param y Row
      * @return true if hit or sunk
      */
     public boolean isHitOrSunk(int x, int y) {
@@ -207,8 +189,8 @@ public class Matrix implements Serializable {
     /**
      * Updates ship state to HIT when it receives a shot.
      *
-     * @param x X coordinate of the shot
-     * @param y Y coordinate of the shot
+     * @param x Column of the shot
+     * @param y Row of the shot
      */
     public void updateShipStateToHit(int x, int y) {
         for (Ship ship : ships) {
@@ -241,7 +223,7 @@ public class Matrix implements Serializable {
             Ship.Direction direction = ship.getDirection();
             boolean allHit = true;
 
-            // Verificar si todas las partes del barco fueron golpeadas
+            // Verificar si todas las partes fueron golpeadas
             for (int i = 0; i < length; i++) {
                 int currentX = direction == Ship.Direction.HORIZONTAL ? shipX + i : shipX;
                 int currentY = direction == Ship.Direction.VERTICAL ? shipY + i : shipY;
@@ -252,7 +234,7 @@ public class Matrix implements Serializable {
                 }
             }
 
-            // Si todas las partes fueron golpeadas, marcar como hundido
+            // Si todo fue golpeado, marcar como hundido
             if (allHit) {
                 for (int i = 0; i < length; i++) {
                     int sunkX = direction == Ship.Direction.HORIZONTAL ? shipX + i : shipX;
@@ -265,9 +247,9 @@ public class Matrix implements Serializable {
     }
 
     /**
-     * Checks if all ships on the board have been sunk.
+     * Checks if all ships have been sunk.
      *
-     * @return true if all ships are sunk
+     * @return true if all are sunk
      */
     public boolean allShipsSunk() {
         for (int i = 0; i < BOARD_SIZE; i++) {
@@ -281,26 +263,58 @@ public class Matrix implements Serializable {
     }
 
     /**
-     * Gets a ship by its index.
+     * Records a shot in the history queue.
      *
-     * @param i Ship index
-     * @return Ship at position i
+     * @param x Column
+     * @param y Row
+     * @param isPlayer true if player shot
+     * @param result "WATER", "HIT" or "SUNK"
      */
+    public void recordShot(int x, int y, boolean isPlayer, String result) {
+        shotHistory.addShot(x, y, isPlayer, result);
+    }
+
+    /**
+     * Gets the shot history queue.
+     *
+     * @return Queue with shot history
+     */
+    public ShotQueue getShotHistory() {
+        return shotHistory;
+    }
+
+    // ==================== GETTERS Y SETTERS ====================
+
     public Ship getShip(int i) {
         return ships.get(i);
     }
 
-    /**
-     * Gets the complete list of ships.
-     *
-     * @return List of ships
-     */
     public List<Ship> getShips() {
         return ships;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public int getSunkShips() {
+        return sunkShips;
+    }
+
+    public void setSunkShips() {
+        this.sunkShips += 1;
+    }
+
+    public int getBoardSize() {
+        return BOARD_SIZE;
+    }
+
     /**
-     * Prints the board to console (useful for debugging).
+     * Prints board to console (for debugging).
      */
     public void getBoard() {
         for (int i = 0; i < BOARD_SIZE; i++) {
@@ -309,49 +323,5 @@ public class Matrix implements Serializable {
             }
             System.out.println();
         }
-        System.out.println();
-    }
-
-    /**
-     * Gets the username.
-     *
-     * @return Username
-     */
-    public String getUsername() {
-        return username;
-    }
-
-    /**
-     * Sets the username.
-     *
-     * @param username New username
-     */
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    /**
-     * Gets the number of sunk ships.
-     *
-     * @return Number of sunk ships
-     */
-    public int getSunkShips() {
-        return sunkShips;
-    }
-
-    /**
-     * Increments the sunk ships counter.
-     */
-    public void setSunkShips() {
-        this.sunkShips += 1;
-    }
-
-    /**
-     * Gets the board size.
-     *
-     * @return Board size (10)
-     */
-    public int getBoardSize() {
-        return BOARD_SIZE;
     }
 }

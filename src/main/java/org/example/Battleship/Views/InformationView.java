@@ -7,10 +7,9 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 /**
- * Main menu view (Singleton pattern).
- *
  * @author Javier Giraldo
  * @author Sebastian Niño
+ * @author Pablo Arias
  * @version 1.0
  */
 public class InformationView {
@@ -29,7 +28,8 @@ public class InformationView {
 
         stage = new Stage();
         stage.setTitle("Batalla Naval");
-        stage.setScene(new Scene(root, 600, 500));
+        // Tamaño: 734x730 para coincidir con information-view.fxml
+        stage.setScene(new Scene(root, 734, 730));
         stage.setResizable(false);
     }
 
@@ -50,6 +50,8 @@ public class InformationView {
      * Shows the main menu window.
      */
     public void show() {
+        stage.sizeToScene();
         stage.show();
+        stage.centerOnScreen();
     }
 }

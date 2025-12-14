@@ -5,10 +5,8 @@ import org.example.Battleship.Models.Matrix;
 import org.example.Battleship.Models.Ship;
 import org.example.Battleship.Models.utilities.serialization;
 import org.example.Battleship.Views.InformationView;
-import org.example.Battleship.Views.PlacementView;
 import org.example.Battleship.Views.AlertBox;
 import javafx.animation.PauseTransition;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
@@ -19,10 +17,10 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.io.IOException;
 import java.util.Random;
 
 /**
@@ -51,12 +49,13 @@ public class GameController {
     private serialization serialization;
     private Game game;
 
-    private final int GRID_SIZE = 400;
+    // Tamaño del tablero en píxeles (300x300 para coincidir con el FXML)
+    private final int GRID_SIZE = 300;
     private final int NUMBERS_CELL = 10;
-    private final int CELL_SIZE = GRID_SIZE / NUMBERS_CELL;
+    private final int CELL_SIZE = GRID_SIZE / NUMBERS_CELL; // 30px por celda
 
     /**
-     * Sets the game boards and loads any previous game if necessary.
+     * Sets the game boards and initializes the view.
      *
      * @param machineBoard Machine's board
      * @param playerBoard Player's board
@@ -67,13 +66,16 @@ public class GameController {
         game = new Game();
         serialization = new serialization();
 
+        // Configurar evento de clic en tablero enemigo
         panePositionMachine.setOnMousePressed(this::handleMousePressed);
 
+        // Dibujar los tableros
         this.drawGrid();
         this.drawShips();
         this.drawGridMachine();
         this.drawHitsContinue();
 
+        // Mostrar nombre del jugador
         nameLabel.setText(playerBoard.getUsername());
         updateTurnLabel();
     }
@@ -110,12 +112,18 @@ public class GameController {
      * @param event Mouse event
      */
     public void handleMousePressed(MouseEvent event) {
+        // Verificar que sea turno del jugador (turno par)
         if (game.getTurn() % 2 != 0) {
-            return; // No es turno del jugador
+            return;
         }
 
         int x = (int) event.getX() / CELL_SIZE;
         int y = (int) event.getY() / CELL_SIZE;
+
+        // Validar límites del tablero
+        if (x < 0 || x >= 10 || y < 0 || y >= 10) {
+            return;
+        }
 
         // Validar que no se dispare en la misma casilla
         if (machineBoard.isWaterHitOrSunk(x, y)) {
@@ -128,9 +136,9 @@ public class GameController {
             return;
         }
 
-        // Procesar disparo
+        // Procesar disparo según el estado de la casilla
         if (machineBoard.getState(x, y) == Matrix.State.EMPTY) {
-            // Disparo al agua, cambiar turno
+            // Disparo al agua - cambiar turno
             game.setTurn();
             machineBoard.changeState(x, y, Matrix.State.WATER);
 
@@ -146,11 +154,11 @@ public class GameController {
             machineTurn();
 
         } else if (machineBoard.getState(x, y) == Matrix.State.OCCUPIED) {
-            // Tocado o hundido, el jugador vuelve a disparar
+            // Tocado - el jugador vuelve a disparar
             machineBoard.updateShipStateToHit(x, y);
             machineBoard.updateAndCheckShipStateToSunk();
 
-            informationLabel.setText("¡Has hundido " + machineBoard.getSunkShips() + " barcos!");
+            informationLabel.setText("¡Has hundido " + machineBoard.getSunkShips() + " barcos enemigos!");
             updateTurnLabel();
 
             // Redibujar el tablero con los nuevos estados
@@ -168,19 +176,19 @@ public class GameController {
      * Executes the machine's turn with random shots.
      */
     private void machineTurn() {
-        PauseTransition pause = new PauseTransition(Duration.seconds(0.4));
+        // Pausa para simular que la máquina "piensa"
+        PauseTransition pause = new PauseTransition(Duration.seconds(0.5));
         pause.setOnFinished(e -> {
             int w, z;
 
+            // Buscar posición válida para disparar
             do {
-                Random random = new Random();
-                int BOARD_SIZE = 10;
-                w = random.nextInt(BOARD_SIZE);
-                z = random.nextInt(BOARD_SIZE);
+                w = new Random().nextInt(10);
+                z = new Random().nextInt(10);
             } while (playerBoard.isWaterHitOrSunk(w, z));
 
             if (playerBoard.getState(w, z) == Matrix.State.EMPTY) {
-                // Disparo al agua, cambiar turno
+                // Disparo al agua - cambiar turno
                 game.setTurn();
                 playerBoard.changeState(w, z, Matrix.State.WATER);
 
@@ -193,7 +201,7 @@ public class GameController {
                 saveGameState();
 
             } else if (playerBoard.getState(w, z) == Matrix.State.OCCUPIED) {
-                // Tocado o hundido, la máquina vuelve a disparar
+                // Tocado - la máquina vuelve a disparar
                 playerBoard.updateShipStateToHit(w, z);
                 playerBoard.updateAndCheckShipStateToSunk();
 
@@ -201,7 +209,7 @@ public class GameController {
                 redrawPlayerBoard();
                 saveGameState();
 
-                // Verificar derrota
+                // Verificar derrota del jugador
                 if (playerBoard.allShipsSunk()) {
                     handleGameEnd(false);
                     return;
@@ -221,7 +229,7 @@ public class GameController {
     private void saveGameState() {
         try {
             // Guardar tableros serializados
-            serialization.serializeObjects("objectsSerialization.txt", machineBoard, playerBoard);
+            serialization.serializeObjects(serialization.getRelativePath(), machineBoard, playerBoard);
 
             // Guardar estadísticas en archivo plano
             serialization.savePlayerStats(
@@ -229,11 +237,25 @@ public class GameController {
                     playerBoard.getSunkShips(),
                     machineBoard.getSunkShips()
             );
-
-            System.out.println("Estado del juego guardado automáticamente.");
         } catch (Exception e) {
-            System.err.println("Error al guardar el estado del juego: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Error al guardar el juego: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Updates the turn label to show current player.
+     */
+    private void updateTurnLabel() {
+        if (game.getTurn() % 2 == 0) {
+            // Turno del jugador
+            labelTurnInGame.setText("⚔ TU TURNO");
+            labelTurnInGame.setTextFill(Color.web("#FFD700"));
+            informationLabel.setText("¡Haz clic en el tablero enemigo para disparar!");
+        } else {
+            // Turno de la máquina
+            labelTurnInGame.setText("🏴‍☠️ TURNO ENEMIGO");
+            labelTurnInGame.setTextFill(Color.web("#FF6B6B"));
+            informationLabel.setText("El enemigo está apuntando...");
         }
     }
 
@@ -243,104 +265,83 @@ public class GameController {
      * @param playerWins true if player won, false if machine won
      */
     private void handleGameEnd(boolean playerWins) {
+        String title = playerWins ? "¡VICTORIA!" : "DERROTA";
+        String message = playerWins ?
+                "¡Felicidades " + playerBoard.getUsername() + "! Has hundido toda la flota enemiga." :
+                "El enemigo ha hundido toda tu flota. ¡Mejor suerte la próxima vez!";
+
+        new AlertBox().showAlert(title, null, message, Alert.AlertType.INFORMATION);
+
+        // Limpiar archivo de guardado y volver al menú
         try {
             serialization.clearFile(serialization.getRelativePath());
-        } catch (Exception ignored) {}
-
-        Platform.runLater(() -> {
-            String title = playerWins ? "¡GANASTE!" : "¡PERDISTE!";
-            String message = playerWins
-                    ? "¡Felicidades! Has hundido la flota enemiga."
-                    : "La máquina ha hundido tu flota.";
-
-            new AlertBox().showAlert(
-                    title,
-                    message,
-                    "",
-                    Alert.AlertType.INFORMATION
-            );
-
-            Platform.exit();
-        });
-    }
-
-    /**
-     * Updates the turn indicator label.
-     */
-    private void updateTurnLabel() {
-        if (game.getTurn() % 2 == 0) {
-            labelTurnInGame.setText("TURNO DE: " + playerBoard.getUsername());
-        } else {
-            labelTurnInGame.setText("TURNO DE: Máquina");
+            InformationView infoView = InformationView.getInstance();
+            infoView.show();
+            ((Stage) nameLabel.getScene().getWindow()).close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     /**
-     * Redraws the machine's board with updated states.
-     */
-    private void redrawMachineBoard() {
-        panePositionMachine.getChildren().removeIf(node ->
-                node instanceof Path && ("shipHit".equals(node.getId()) || "shipSunk".equals(node.getId()))
-        );
-
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
-                if (machineBoard.getState(i, j) == Matrix.State.SUNK) {
-                    Path shipSunk = drawShipSunk();
-                    shipSunk.setId("shipSunk");
-                    shipSunk.setLayoutX(i * CELL_SIZE);
-                    shipSunk.setLayoutY(j * CELL_SIZE);
-                    panePositionMachine.getChildren().add(shipSunk);
-                } else if (machineBoard.getState(i, j) == Matrix.State.HIT) {
-                    Path shipHit = drawShipHit();
-                    shipHit.setId("shipHit");
-                    shipHit.setLayoutX(i * CELL_SIZE);
-                    shipHit.setLayoutY(j * CELL_SIZE);
-                    panePositionMachine.getChildren().add(shipHit);
-                }
-            }
-        }
-    }
-
-    /**
-     * Redraws the player's board with updated states.
+     * Redraws the player's board to show hit and sunk states.
      */
     private void redrawPlayerBoard() {
-        panePosition.getChildren().removeIf(node ->
-                node instanceof Path && ("shipHit".equals(node.getId()) || "shipSunk".equals(node.getId()))
-        );
-
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
-                if (playerBoard.getState(i, j) == Matrix.State.SUNK) {
-                    Path shipSunk = drawShipSunk();
-                    shipSunk.setId("shipSunk");
-                    shipSunk.setLayoutX(i * CELL_SIZE);
-                    shipSunk.setLayoutY(j * CELL_SIZE);
-                    panePosition.getChildren().add(shipSunk);
-                } else if (playerBoard.getState(i, j) == Matrix.State.HIT) {
-                    Path shipHit = drawShipHit();
-                    shipHit.setId("shipHit");
-                    shipHit.setLayoutX(i * CELL_SIZE);
-                    shipHit.setLayoutY(j * CELL_SIZE);
-                    panePosition.getChildren().add(shipHit);
+                Matrix.State state = playerBoard.getState(i, j);
+                if (state == Matrix.State.HIT || state == Matrix.State.SUNK) {
+                    final int fi = i, fj = j;
+                    // Remover marcador anterior si existe
+                    panePosition.getChildren().removeIf(node ->
+                            node.getLayoutX() == fi * CELL_SIZE &&
+                                    node.getLayoutY() == fj * CELL_SIZE && node instanceof Path);
+
+                    Path marker = (state == Matrix.State.SUNK) ? drawShipSunk() : drawShipHit();
+                    marker.setLayoutX(i * CELL_SIZE);
+                    marker.setLayoutY(j * CELL_SIZE);
+                    panePosition.getChildren().add(marker);
                 }
             }
         }
     }
 
     /**
-     * Draws the player's board grid with labels.
+     * Redraws the machine's board to show hit and sunk states.
+     */
+    private void redrawMachineBoard() {
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                Matrix.State state = machineBoard.getState(i, j);
+                if (state == Matrix.State.HIT || state == Matrix.State.SUNK) {
+                    final int fi = i, fj = j;
+                    // Remover marcador anterior si existe
+                    panePositionMachine.getChildren().removeIf(node ->
+                            node.getLayoutX() == fi * CELL_SIZE &&
+                                    node.getLayoutY() == fj * CELL_SIZE && node instanceof Path);
+
+                    Path marker = (state == Matrix.State.SUNK) ? drawShipSunk() : drawShipHit();
+                    marker.setLayoutX(i * CELL_SIZE);
+                    marker.setLayoutY(j * CELL_SIZE);
+                    panePositionMachine.getChildren().add(marker);
+                }
+            }
+        }
+    }
+
+    /**
+     * Draws the player's board grid with row and column labels.
      */
     public void drawGrid() {
+        // Dibujar líneas horizontales y verticales
         for (int i = 0; i <= NUMBERS_CELL; i++) {
             Line hLine = new Line(0, i * CELL_SIZE, GRID_SIZE, i * CELL_SIZE);
-            hLine.setStroke(Color.web("#b4b4ff"));
+            hLine.setStroke(Color.web("#5F9EA0"));
             hLine.setStrokeWidth(0.5);
             panePosition.getChildren().add(hLine);
 
             Line vLine = new Line(i * CELL_SIZE, 0, i * CELL_SIZE, GRID_SIZE);
-            vLine.setStroke(Color.web("#b4b4ff"));
+            vLine.setStroke(Color.web("#5F9EA0"));
             vLine.setStrokeWidth(0.5);
             panePosition.getChildren().add(vLine);
         }
@@ -351,9 +352,8 @@ public class GameController {
             Label label = new Label(String.valueOf(letter));
             label.setPrefSize(CELL_SIZE, 30);
             label.setAlignment(Pos.CENTER);
-            label.setStyle("-fx-text-fill: white; -fx-font-size: 12px;");
+            label.setStyle("-fx-text-fill: #87CEEB; -fx-font-size: 11px; -fx-font-weight: bold;");
             AnchorPane.setLeftAnchor(label, i * (double) CELL_SIZE);
-            AnchorPane.setTopAnchor(label, 0.0);
             columnsPane.getChildren().add(label);
         }
 
@@ -362,25 +362,25 @@ public class GameController {
             Label label = new Label(String.valueOf(i + 1));
             label.setPrefSize(30, CELL_SIZE);
             label.setAlignment(Pos.CENTER);
-            label.setStyle("-fx-text-fill: white; -fx-font-size: 12px;");
-            AnchorPane.setLeftAnchor(label, 0.0);
+            label.setStyle("-fx-text-fill: #87CEEB; -fx-font-size: 11px; -fx-font-weight: bold;");
             AnchorPane.setTopAnchor(label, i * (double) CELL_SIZE);
             rowsPane.getChildren().add(label);
         }
     }
 
     /**
-     * Draws the machine's board grid with labels.
+     * Draws the machine's board grid with row and column labels.
      */
     public void drawGridMachine() {
+        // Dibujar líneas horizontales y verticales
         for (int i = 0; i <= NUMBERS_CELL; i++) {
             Line hLine = new Line(0, i * CELL_SIZE, GRID_SIZE, i * CELL_SIZE);
-            hLine.setStroke(Color.web("#ff6b6b"));
+            hLine.setStroke(Color.web("#8B0000"));
             hLine.setStrokeWidth(0.5);
             panePositionMachine.getChildren().add(hLine);
 
             Line vLine = new Line(i * CELL_SIZE, 0, i * CELL_SIZE, GRID_SIZE);
-            vLine.setStroke(Color.web("#ff6b6b"));
+            vLine.setStroke(Color.web("#8B0000"));
             vLine.setStrokeWidth(0.5);
             panePositionMachine.getChildren().add(vLine);
         }
@@ -391,9 +391,8 @@ public class GameController {
             Label label = new Label(String.valueOf(letter));
             label.setPrefSize(CELL_SIZE, 30);
             label.setAlignment(Pos.CENTER);
-            label.setStyle("-fx-text-fill: white; -fx-font-size: 12px;");
+            label.setStyle("-fx-text-fill: #FF6B6B; -fx-font-size: 11px; -fx-font-weight: bold;");
             AnchorPane.setLeftAnchor(label, i * (double) CELL_SIZE);
-            AnchorPane.setTopAnchor(label, 0.0);
             columnsPaneMachine.getChildren().add(label);
         }
 
@@ -402,8 +401,7 @@ public class GameController {
             Label label = new Label(String.valueOf(i + 1));
             label.setPrefSize(30, CELL_SIZE);
             label.setAlignment(Pos.CENTER);
-            label.setStyle("-fx-text-fill: white; -fx-font-size: 12px;");
-            AnchorPane.setLeftAnchor(label, 0.0);
+            label.setStyle("-fx-text-fill: #FF6B6B; -fx-font-size: 11px; -fx-font-weight: bold;");
             AnchorPane.setTopAnchor(label, i * (double) CELL_SIZE);
             rowsPaneMachine.getChildren().add(label);
         }
@@ -417,14 +415,18 @@ public class GameController {
             Ship ship = playerBoard.getShip(i);
             Path path = ship.getDraw();
 
+            // Escalar barco de 40px a 30px (factor 0.75)
+            path.getTransforms().add(new Scale(0.75, 0.75));
+
             path.setLayoutX(ship.getTailX() * CELL_SIZE);
             path.setLayoutY(ship.getTailY() * CELL_SIZE);
-            path.setStrokeWidth(2);
+            path.setStrokeWidth(1.5);
             path.setStroke(Color.web("#00d4ff"));
             path.setFill(Color.rgb(0, 212, 255, 0.15));
 
+            // Rotar si el barco está en vertical
             if (ship.getDirection() == Ship.Direction.VERTICAL) {
-                Rotate rotate = new Rotate(90, 20, 20);
+                Rotate rotate = new Rotate(90, 15, 15);
                 path.getTransforms().add(rotate);
             }
 
@@ -435,23 +437,22 @@ public class GameController {
     /**
      * Draws an X shape to indicate a water shot.
      *
-     * @return Path with the water figure
+     * @return Path with the X figure
      */
-    public static Path drawWaterHit() {
+    public Path drawWaterHit() {
         Path path = new Path();
-        int size = 40;
-        int padding = 8;
+        int padding = 6;
 
         // Línea diagonal \
         path.getElements().add(new MoveTo(padding, padding));
-        path.getElements().add(new LineTo(size - padding, size - padding));
+        path.getElements().add(new LineTo(CELL_SIZE - padding, CELL_SIZE - padding));
 
         // Línea diagonal /
-        path.getElements().add(new MoveTo(size - padding, padding));
-        path.getElements().add(new LineTo(padding, size - padding));
+        path.getElements().add(new MoveTo(CELL_SIZE - padding, padding));
+        path.getElements().add(new LineTo(padding, CELL_SIZE - padding));
 
         path.setStroke(Color.web("#4a9eff"));
-        path.setStrokeWidth(3);
+        path.setStrokeWidth(2.5);
         path.setStrokeLineCap(StrokeLineCap.ROUND);
 
         return path;
@@ -460,19 +461,17 @@ public class GameController {
     /**
      * Draws a circle to indicate a hit ship.
      *
-     * @return Path with the hit figure
+     * @return Path with the circle figure
      */
-    public static Path drawShipHit() {
+    public Path drawShipHit() {
         Path path = new Path();
-        int size = 40;
-        int centerX = size / 2;
-        int centerY = size / 2;
-        int radius = 12;
+        int center = CELL_SIZE / 2;
+        int radius = 9;
 
         // Crear círculo usando arcos
-        path.getElements().add(new MoveTo(centerX + radius, centerY));
-        path.getElements().add(new ArcTo(radius, radius, 0, centerX - radius, centerY, false, true));
-        path.getElements().add(new ArcTo(radius, radius, 0, centerX + radius, centerY, false, true));
+        path.getElements().add(new MoveTo(center + radius, center));
+        path.getElements().add(new ArcTo(radius, radius, 0, center - radius, center, false, true));
+        path.getElements().add(new ArcTo(radius, radius, 0, center + radius, center, false, true));
         path.getElements().add(new ClosePath());
 
         path.setStroke(Color.web("#ffa500"));
@@ -487,27 +486,25 @@ public class GameController {
      *
      * @return Path with the sunk figure
      */
-    public static Path drawShipSunk() {
+    public Path drawShipSunk() {
         Path path = new Path();
-        int size = 40;
-        int centerX = size / 2;
-        int centerY = size / 2;
-        int radius = 14;
-        int padding = 6;
+        int center = CELL_SIZE / 2;
+        int radius = 10;
+        int pad = 5;
 
         // Círculo exterior
-        path.getElements().add(new MoveTo(centerX + radius, centerY));
-        path.getElements().add(new ArcTo(radius, radius, 0, centerX - radius, centerY, false, true));
-        path.getElements().add(new ArcTo(radius, radius, 0, centerX + radius, centerY, false, true));
+        path.getElements().add(new MoveTo(center + radius, center));
+        path.getElements().add(new ArcTo(radius, radius, 0, center - radius, center, false, true));
+        path.getElements().add(new ArcTo(radius, radius, 0, center + radius, center, false, true));
 
         // X interior
-        path.getElements().add(new MoveTo(centerX - padding, centerY - padding));
-        path.getElements().add(new LineTo(centerX + padding, centerY + padding));
-        path.getElements().add(new MoveTo(centerX + padding, centerY - padding));
-        path.getElements().add(new LineTo(centerX - padding, centerY + padding));
+        path.getElements().add(new MoveTo(center - pad, center - pad));
+        path.getElements().add(new LineTo(center + pad, center + pad));
+        path.getElements().add(new MoveTo(center + pad, center - pad));
+        path.getElements().add(new LineTo(center - pad, center + pad));
 
         path.setStroke(Color.web("#ff4444"));
-        path.setStrokeWidth(2.5);
+        path.setStrokeWidth(2);
         path.setStrokeLineCap(StrokeLineCap.ROUND);
         path.setFill(Color.web("#ff4444", 0.3));
 
@@ -518,48 +515,27 @@ public class GameController {
      * Redraws hit states when loading a saved game.
      */
     public void drawHitsContinue() {
-        // Redibujar estados del tablero del jugador
+        // Redibujar estados de ambos tableros
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
+                // Tablero del jugador
                 Matrix.State state = playerBoard.getState(i, j);
-                if (state == Matrix.State.WATER) {
-                    Path water = drawWaterHit();
-                    water.setLayoutX(i * CELL_SIZE);
-                    water.setLayoutY(j * CELL_SIZE);
-                    panePosition.getChildren().add(water);
-                } else if (state == Matrix.State.HIT) {
-                    Path hit = drawShipHit();
-                    hit.setLayoutX(i * CELL_SIZE);
-                    hit.setLayoutY(j * CELL_SIZE);
-                    panePosition.getChildren().add(hit);
-                } else if (state == Matrix.State.SUNK) {
-                    Path sunk = drawShipSunk();
-                    sunk.setLayoutX(i * CELL_SIZE);
-                    sunk.setLayoutY(j * CELL_SIZE);
-                    panePosition.getChildren().add(sunk);
+                if (state == Matrix.State.WATER || state == Matrix.State.HIT || state == Matrix.State.SUNK) {
+                    Path marker = (state == Matrix.State.WATER) ? drawWaterHit() :
+                            (state == Matrix.State.HIT) ? drawShipHit() : drawShipSunk();
+                    marker.setLayoutX(i * CELL_SIZE);
+                    marker.setLayoutY(j * CELL_SIZE);
+                    panePosition.getChildren().add(marker);
                 }
-            }
-        }
 
-        // Redibujar estados del tablero de la máquina
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
-                Matrix.State state = machineBoard.getState(i, j);
-                if (state == Matrix.State.WATER) {
-                    Path water = drawWaterHit();
-                    water.setLayoutX(i * CELL_SIZE);
-                    water.setLayoutY(j * CELL_SIZE);
-                    panePositionMachine.getChildren().add(water);
-                } else if (state == Matrix.State.HIT) {
-                    Path hit = drawShipHit();
-                    hit.setLayoutX(i * CELL_SIZE);
-                    hit.setLayoutY(j * CELL_SIZE);
-                    panePositionMachine.getChildren().add(hit);
-                } else if (state == Matrix.State.SUNK) {
-                    Path sunk = drawShipSunk();
-                    sunk.setLayoutX(i * CELL_SIZE);
-                    sunk.setLayoutY(j * CELL_SIZE);
-                    panePositionMachine.getChildren().add(sunk);
+                // Tablero de la máquina
+                Matrix.State machineState = machineBoard.getState(i, j);
+                if (machineState == Matrix.State.WATER || machineState == Matrix.State.HIT || machineState == Matrix.State.SUNK) {
+                    Path marker = (machineState == Matrix.State.WATER) ? drawWaterHit() :
+                            (machineState == Matrix.State.HIT) ? drawShipHit() : drawShipSunk();
+                    marker.setLayoutX(i * CELL_SIZE);
+                    marker.setLayoutY(j * CELL_SIZE);
+                    panePositionMachine.getChildren().add(marker);
                 }
             }
         }
