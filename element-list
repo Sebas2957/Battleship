@@ -1,0 +1,11 @@
+module:org.example.Battleship
+org.example.Battleship
+org.example.Battleship.Controllers
+org.example.Battleship.Models
+org.example.Battleship.Models.exceptions
+org.example.Battleship.Models.factories
+org.example.Battleship.Models.interfaces
+org.example.Battleship.Models.observers
+org.example.Battleship.Models.structures
+org.example.Battleship.Models.utilities
+org.example.Battleship.Views

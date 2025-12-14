@@ -25,6 +25,7 @@ import java.io.IOException;
  *
  * @author Javier Giraldo
  * @author Sebastian Niño
+ * @author Pablo Arias
  * @version 1.0
  */
 public class MachineView {
@@ -85,10 +86,13 @@ public class MachineView {
 
         boardsContainer.getChildren().addAll(playerContainer, machineContainer);
 
-        // Botón cerrar - solo cierra esta ventana
+        // Botón cerrar - SOLO cierra esta ventana
         Button closeButton = new Button("✓ CERRAR Y CONTINUAR");
         closeButton.setStyle("-fx-background-color: #e94560; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10 30; -fx-background-radius: 8; -fx-cursor: hand;");
-        closeButton.setOnAction(e -> stage.close());
+        closeButton.setOnAction(e -> {
+            // Solo cerrar esta ventana de verificación
+            stage.close();
+        });
 
         root.getChildren().addAll(title, subtitle, boardsContainer, closeButton);
 
@@ -98,70 +102,81 @@ public class MachineView {
     /**
      * Creates a container with a board and its ships.
      *
-     * @param title Container title
-     * @param board Board to display
-     * @param color Border color
-     * @return VBox with the board container
+     * @param labelText Board title
+     * @param board Matrix board
+     * @param color Board accent color
+     * @return VBox with the board
      */
-    private VBox createBoardContainer(String title, Matrix board, String color) {
-        VBox container = new VBox(10);
+    private VBox createBoardContainer(String labelText, Matrix board, String color) {
+        VBox container = new VBox(8);
         container.setAlignment(Pos.CENTER);
 
-        Label label = new Label(title);
-        label.setStyle("-fx-text-fill: " + color + "; -fx-font-size: 16px; -fx-font-weight: bold;");
+        // Etiqueta del tablero
+        Label boardLabel = new Label(labelText);
+        boardLabel.setStyle("-fx-text-fill: " + color + "; -fx-font-size: 18px; -fx-font-weight: bold;");
 
+        // Crear el tablero
         AnchorPane boardPane = new AnchorPane();
+
+        // FIJAR TAMAÑO PARA EVITAR EXPANSIÓN
         boardPane.setPrefSize(GRID_SIZE, GRID_SIZE);
-        boardPane.setStyle("-fx-background-color: #0a1628; -fx-border-color: " + color + "; -fx-border-width: 2;");
+        boardPane.setMaxSize(GRID_SIZE, GRID_SIZE);
+        boardPane.setMinSize(GRID_SIZE, GRID_SIZE);
+
+        boardPane.setStyle("-fx-background-color: rgba(10, 30, 60, 0.85); -fx-border-color: " + color + "; -fx-border-width: 2; -fx-border-radius: 5; -fx-background-radius: 5;");
 
         // Dibujar cuadrícula
-        drawGrid(boardPane);
+        drawGrid(boardPane, color);
 
         // Dibujar barcos
         drawShips(boardPane, board);
 
-        container.getChildren().addAll(label, boardPane);
+        container.getChildren().addAll(boardLabel, boardPane);
+
         return container;
     }
 
     /**
-     * Draws the board grid.
+     * Draws the grid lines.
      *
-     * @param pane Pane to draw on
+     * @param pane Target pane
+     * @param color Grid color
      */
-    private void drawGrid(AnchorPane pane) {
+    private void drawGrid(AnchorPane pane, String color) {
         for (int i = 0; i <= NUMBERS_CELL; i++) {
+            // Líneas horizontales
             Line hLine = new Line(0, i * CELL_SIZE, GRID_SIZE, i * CELL_SIZE);
-            hLine.setStroke(Color.web("#3a3a5a"));
+            hLine.setStroke(Color.web(color, 0.3));
             hLine.setStrokeWidth(0.5);
+            pane.getChildren().add(hLine);
 
+            // Líneas verticales
             Line vLine = new Line(i * CELL_SIZE, 0, i * CELL_SIZE, GRID_SIZE);
-            vLine.setStroke(Color.web("#3a3a5a"));
+            vLine.setStroke(Color.web(color, 0.3));
             vLine.setStrokeWidth(0.5);
-
-            pane.getChildren().addAll(hLine, vLine);
+            pane.getChildren().add(vLine);
         }
     }
 
     /**
-     * Draws the ships on the board.
+     * Draws ships on the board.
      *
-     * @param pane Pane to draw on
-     * @param board Board containing the ships
+     * @param pane Target pane
+     * @param board Matrix with ships
      */
     private void drawShips(AnchorPane pane, Matrix board) {
         for (int i = 0; i < 10; i++) {
             Ship ship = board.getShip(i);
             Path path = ship.getDraw();
 
-            // Escalar el barco de 40px a 30px (factor 0.75)
+            // Escalar de 40px a 30px (factor 0.75)
             path.getTransforms().add(new Scale(0.75, 0.75));
 
             path.setLayoutX(ship.getTailX() * CELL_SIZE);
             path.setLayoutY(ship.getTailY() * CELL_SIZE);
             path.setStrokeWidth(1.5);
             path.setStroke(Color.web("#00d4ff"));
-            path.setFill(Color.rgb(0, 212, 255, 0.1));
+            path.setFill(Color.rgb(0, 212, 255, 0.15));
 
             // Rotar si el barco está en vertical
             if (ship.getDirection() == Ship.Direction.VERTICAL) {

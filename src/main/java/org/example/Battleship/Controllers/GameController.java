@@ -60,11 +60,26 @@ public class GameController {
      * @param machineBoard Machine's board
      * @param playerBoard Player's board
      */
+    /**
+     * Sets the game boards and initializes the view.
+     *
+     * @param machineBoard Machine's board
+     * @param playerBoard Player's board
+     */
     public void setBoards(Matrix machineBoard, Matrix playerBoard) {
         this.machineBoard = machineBoard;
         this.playerBoard = playerBoard;
         game = new Game();
         serialization = new serialization();
+
+        // Fijar tamaño de ambos tableros para evitar expansión
+        panePosition.setPrefSize(GRID_SIZE, GRID_SIZE);
+        panePosition.setMaxSize(GRID_SIZE, GRID_SIZE);
+        panePosition.setMinSize(GRID_SIZE, GRID_SIZE);
+
+        panePositionMachine.setPrefSize(GRID_SIZE, GRID_SIZE);
+        panePositionMachine.setMaxSize(GRID_SIZE, GRID_SIZE);
+        panePositionMachine.setMinSize(GRID_SIZE, GRID_SIZE);
 
         // Configurar evento de clic en tablero enemigo
         panePositionMachine.setOnMousePressed(this::handleMousePressed);
@@ -354,16 +369,18 @@ public class GameController {
             label.setAlignment(Pos.CENTER);
             label.setStyle("-fx-text-fill: #87CEEB; -fx-font-size: 11px; -fx-font-weight: bold;");
             AnchorPane.setLeftAnchor(label, i * (double) CELL_SIZE);
+            AnchorPane.setTopAnchor(label, 0.0);
             columnsPane.getChildren().add(label);
         }
 
-        // Etiquetas de filas (1-10)
+        // Etiquetas de filas (1-10) - CORRECCIÓN AQUÍ
         for (int i = 0; i < NUMBERS_CELL; i++) {
             Label label = new Label(String.valueOf(i + 1));
             label.setPrefSize(30, CELL_SIZE);
             label.setAlignment(Pos.CENTER);
             label.setStyle("-fx-text-fill: #87CEEB; -fx-font-size: 11px; -fx-font-weight: bold;");
-            AnchorPane.setTopAnchor(label, i * (double) CELL_SIZE);
+            AnchorPane.setRightAnchor(label, 0.0);
+            AnchorPane.setTopAnchor(label, i * (double) CELL_SIZE);  // ESTO ALINEA CORRECTAMENTE
             rowsPane.getChildren().add(label);
         }
     }
@@ -393,16 +410,18 @@ public class GameController {
             label.setAlignment(Pos.CENTER);
             label.setStyle("-fx-text-fill: #FF6B6B; -fx-font-size: 11px; -fx-font-weight: bold;");
             AnchorPane.setLeftAnchor(label, i * (double) CELL_SIZE);
+            AnchorPane.setTopAnchor(label, 0.0);
             columnsPaneMachine.getChildren().add(label);
         }
 
-        // Etiquetas de filas (1-10)
+        // Etiquetas de filas (1-10) - CORRECCIÓN AQUÍ
         for (int i = 0; i < NUMBERS_CELL; i++) {
             Label label = new Label(String.valueOf(i + 1));
             label.setPrefSize(30, CELL_SIZE);
             label.setAlignment(Pos.CENTER);
             label.setStyle("-fx-text-fill: #FF6B6B; -fx-font-size: 11px; -fx-font-weight: bold;");
-            AnchorPane.setTopAnchor(label, i * (double) CELL_SIZE);
+            AnchorPane.setRightAnchor(label, 0.0);
+            AnchorPane.setTopAnchor(label, i * (double) CELL_SIZE);  // ESTO ALINEA CORRECTAMENTE
             rowsPaneMachine.getChildren().add(label);
         }
     }

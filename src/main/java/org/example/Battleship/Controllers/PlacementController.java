@@ -102,17 +102,13 @@ public class PlacementController {
         machineBoard = new Matrix();
         movementValid = false;
 
-        this.drawGrid();
-        this.drawShips();
-        // Arregla el error de estiramiento de ultima columna
+        // Fijar tamaño del tablero para evitar expansión
         panePosition.setPrefSize(GRID_SIZE, GRID_SIZE);
         panePosition.setMaxSize(GRID_SIZE, GRID_SIZE);
         panePosition.setMinSize(GRID_SIZE, GRID_SIZE);
 
-        // Arregla el error de estiramiento de ultima columna
-        panePosition.setPrefSize(GRID_SIZE, GRID_SIZE);
-        panePosition.setMaxSize(GRID_SIZE, GRID_SIZE);
-        panePosition.setMinSize(GRID_SIZE, GRID_SIZE);
+        this.drawGrid();
+        this.drawShips();
 
         // Configurar eventos de mouse para drag and drop
         panePosition.setOnMouseMoved(this::handleMouseMoved);
@@ -298,22 +294,24 @@ public class PlacementController {
             char letter = (char) (65 + i);
 
             label = new Label(String.valueOf(letter));
-            label.setPrefSize(40, 40);
+            label.setPrefSize(CELL_SIZE, 35);  // Cambiado de 40 a 35
             label.setAlignment(Pos.CENTER);
             label.setStyle("-fx-font-size: 18px; -fx-text-fill: white;");
 
-            AnchorPane.setLeftAnchor((Node) label, (double) (i * CELL_SIZE));
+            AnchorPane.setLeftAnchor(label, (double) (i * CELL_SIZE));
             AnchorPane.setTopAnchor(label, 0.0);
             columnsPane.getChildren().add(label);
+        }
 
-            // Etiquetas de filas (1-10)
+        // Etiquetas de filas (1-10) - CORRECCIÓN AQUÍ
+        for (int i = 0; i < NUMBERS_CELL; i++) {
             label = new Label(String.valueOf(i + 1));
-            label.setPrefSize(40, 40);
+            label.setPrefSize(35, CELL_SIZE);  // Cambiado de 40 a 35
             label.setAlignment(Pos.CENTER);
             label.setStyle("-fx-font-size: 18px; -fx-text-fill: white;");
 
             AnchorPane.setRightAnchor(label, 0.0);
-            AnchorPane.setTopAnchor((Node) label, (double) (i * CELL_SIZE));
+            AnchorPane.setTopAnchor(label, (double) (i * CELL_SIZE));  // ESTO ALINEA CORRECTAMENTE
             rowsPane.getChildren().add(label);
         }
     }
