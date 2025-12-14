@@ -105,7 +105,7 @@ public class PlacementController {
         this.drawGrid();
         this.drawShips();
 
-        // Arregla el error de estiramiento de recuadro
+        // Arregla el error de estiramiento de ultima columna
         panePosition.setPrefSize(GRID_SIZE, GRID_SIZE);
         panePosition.setMaxSize(GRID_SIZE, GRID_SIZE);
         panePosition.setMinSize(GRID_SIZE, GRID_SIZE);
