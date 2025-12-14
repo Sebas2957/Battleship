@@ -85,6 +85,10 @@ public class PlacementController {
 
         this.drawGrid();
         this.drawShips();
+        // Arregla el error de estiramiento de ultima columna
+        panePosition.setPrefSize(GRID_SIZE, GRID_SIZE);
+        panePosition.setMaxSize(GRID_SIZE, GRID_SIZE);
+        panePosition.setMinSize(GRID_SIZE, GRID_SIZE);
 
         // Configurar eventos de mouse para drag and drop
         panePosition.setOnMouseMoved(this::handleMouseMoved);
