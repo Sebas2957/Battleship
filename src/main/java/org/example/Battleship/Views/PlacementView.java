@@ -19,18 +19,12 @@ public class PlacementView {
 
     private Stage stage;
 
-    /**
-     * Constructor that creates the placement view.
-     *
-     * @throws IOException If FXML file cannot be loaded
-     */
     public PlacementView() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/Battleship/placement-view.fxml"));
         Parent root = loader.load();
 
         stage = new Stage();
         stage.setTitle("Batalla Naval - Coloca tus barcos");
-        // Tamaño: 1337x705 para coincidir con placement-view.fxml
         stage.setScene(new Scene(root, 1337, 705));
         stage.setResizable(false);
     }
@@ -55,9 +49,6 @@ public class PlacementView {
         stage.setResizable(false);
     }
 
-    /**
-     * Shows the placement window.
-     */
     public void show() {
         stage.sizeToScene();
         stage.show();

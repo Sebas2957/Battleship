@@ -22,13 +22,6 @@ public class GameView {
     private Matrix machineBoard;
     private Matrix playerBoard;
 
-    /**
-     * Constructor that creates the game view.
-     *
-     * @param machineBoard Machine's board
-     * @param playerBoard Player's board
-     * @throws IOException If FXML file cannot be loaded
-     */
     public GameView(Matrix machineBoard, Matrix playerBoard) throws IOException {
         this.machineBoard = machineBoard;
         this.playerBoard = playerBoard;
@@ -36,7 +29,6 @@ public class GameView {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/Battleship/game-view.fxml"));
         Parent root = loader.load();
 
-        // Pasar los tableros al controlador
         GameController controller = loader.getController();
         controller.setBoards(machineBoard, playerBoard);
 
@@ -46,9 +38,6 @@ public class GameView {
         stage.setResizable(false);
     }
 
-    /**
-     * Shows the game window.
-     */
     public void show() {
         stage.sizeToScene();
         stage.show();

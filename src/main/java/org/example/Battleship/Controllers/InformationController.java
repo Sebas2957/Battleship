@@ -199,6 +199,7 @@ public class InformationController {
 
         if (confirmed) {
             try {
+                // Mostrar la vista de colocación y cerrar la vista actual
                 PlacementView placementView = new PlacementView();
                 placementView.show();
                 closeCurrentWindow();

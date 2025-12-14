@@ -158,6 +158,7 @@ public class PlacementController {
         try {
             isDragging = true;
 
+<<<<<<< HEAD
             // Obtener posición del mouse
             double mouseX = event.getX();
             double mouseY = event.getY();
@@ -165,6 +166,32 @@ public class PlacementController {
             // Calcular la celda objetivo
             int cellX = (int) (mouseX / CELL_SIZE);
             int cellY = (int) (mouseY / CELL_SIZE);
+=======
+            // Calcular la celda objetivo (índices i, j)
+            int cellX = positionX / CELL_SIZE;
+            int cellY = positionY / CELL_SIZE;
+
+            // Calcular la posición ajustada a la cuadrícula
+            int positionFixX = cellX * CELL_SIZE;
+            int positionFixY = cellY * CELL_SIZE;
+
+            // 1. Validar la posición (usando la posición fija)
+            movementValid = playerBoard.validatePosition(cellX, cellY, targetShip);
+
+            // 2. Obtener dimensiones del barco en píxeles
+            // Nota: Se utiliza getWidth/getHeight de Ship que manejan la rotación
+            int shipWidth = targetShip.getWidth() * CELL_SIZE;
+            int shipHeight = targetShip.getHeight() * CELL_SIZE;
+
+            // 3. Limitar (clampear) la posición fija para que el barco no se salga del AnchorPane (400x400)
+            // Esto asegura que el barco siempre esté visible, independientemente de la validez.
+            double newLayoutX = Math.max(0, Math.min(positionFixX, GRID_SIZE - shipWidth));
+            double newLayoutY = Math.max(0, Math.min(positionFixY, GRID_SIZE - shipHeight));
+
+            // 4. Aplicar posición y coloreado
+            this.targetPath.setLayoutX(newLayoutX);
+            this.targetPath.setLayoutY(newLayoutY);
+>>>>>>> 49acdee11fc28039da10cd24edc94a0237768386
 
             // Obtener dimensiones del barco en celdas
             int shipWidthCells = targetShip.getWidth();
@@ -194,6 +221,10 @@ public class PlacementController {
                 this.targetPath.setStroke(Color.web("#40bf44"));
                 this.targetPath.setFill(Color.rgb(64, 191, 68, 0.05));
             } else {
+<<<<<<< HEAD
+=======
+                // Barco rojo cuando no es una posición válida
+>>>>>>> 49acdee11fc28039da10cd24edc94a0237768386
                 this.targetPath.setStroke(Color.web("#f00"));
                 this.targetPath.setFill(Color.rgb(255, 0, 0, 0.05));
             }
@@ -293,6 +324,10 @@ public class PlacementController {
             label.setAlignment(Pos.CENTER);
             label.setStyle("-fx-font-size: 18px; -fx-text-fill: white;");
 
+<<<<<<< HEAD
+=======
+            // La etiqueta 'A' (i=0) debe empezar en la posición 0.0 de columnsPane
+>>>>>>> 49acdee11fc28039da10cd24edc94a0237768386
             AnchorPane.setLeftAnchor((Node) label, (double) (i * CELL_SIZE));
             AnchorPane.setTopAnchor(label, 0.0);
             columnsPane.getChildren().add(label);
@@ -303,8 +338,14 @@ public class PlacementController {
             label.setAlignment(Pos.CENTER);
             label.setStyle("-fx-font-size: 18px; -fx-text-fill: white;");
 
+<<<<<<< HEAD
             AnchorPane.setRightAnchor(label, 0.0);
             AnchorPane.setTopAnchor((Node) label, (double) (i * CELL_SIZE));
+=======
+            // Desplazamiento vertical para dejar espacio a las letras (ESTO SE MANTIENE CORRECTO)
+            AnchorPane.setRightAnchor(label, 0.0);
+            AnchorPane.setTopAnchor((Node) label, (double) ((i + 1) * CELL_SIZE));
+>>>>>>> 49acdee11fc28039da10cd24edc94a0237768386
             rowsPane.getChildren().add(label);
         }
     }
@@ -323,6 +364,10 @@ public class PlacementController {
             path.setLayoutX(ship.getTailX() * CELL_SIZE);
             path.setLayoutY(ship.getTailY() * CELL_SIZE);
             path.setStrokeWidth(2);
+<<<<<<< HEAD
+=======
+            // Color de barco inicial (Rojo)
+>>>>>>> 49acdee11fc28039da10cd24edc94a0237768386
             path.setStroke(Color.web("#f00"));
             path.setFill(Color.rgb(255, 0, 0, 0.05));
 

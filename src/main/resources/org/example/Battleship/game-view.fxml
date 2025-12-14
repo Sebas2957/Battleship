@@ -8,63 +8,78 @@
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="524.0" prefWidth="1010.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.Battleship.Controllers.GameController">
+<AnchorPane prefHeight="524.0" prefWidth="1010.0"
+            xmlns="http://javafx.com/javafx/17.0.12"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.Battleship.Controllers.GameController">
+
     <children>
         <ImageView fitHeight="560.0" fitWidth="1010.0" pickOnBounds="true" preserveRatio="true">
             <image>
-                <Image url="@imagenes/Pirate_Game_Table_Top_View.png" />
+                <Image url="@imagenes/Pirate_Game_Table_Top_View.png"/>
             </image>
         </ImageView>
 
-        <VBox alignment="TOP_CENTER" layoutX="30.0" layoutY="15.0" prefHeight="520.0" prefWidth="940.0" spacing="8">
+        <VBox alignment="TOP_CENTER" layoutX="30.0" layoutY="15.0"
+              prefHeight="520.0" prefWidth="940.0" spacing="8">
+
             <children>
                 <Label fx:id="labelTurnInGame" text="Tu Turno" textFill="#FFD700">
                     <font>
-                        <Font name="System Bold" size="36.0" />
+                        <Font name="System Bold" size="36.0"/>
                     </font>
                     <effect>
-                        <javafx.scene.effect.DropShadow color="#000000" radius="5" />
+                        <DropShadow color="#000000" radius="5"/>
                     </effect>
                 </Label>
 
-                <Label fx:id="informationLabel" text="¡Haz clic en el tablero enemigo para disparar!" textFill="#cccccc">
+                <Label fx:id="informationLabel"
+                       text="¡Haz clic en el tablero enemigo para disparar!"
+                       textFill="#cccccc">
                     <font>
-                        <Font size="14.0" />
+                        <Font size="14.0"/>
                     </font>
                 </Label>
 
                 <HBox alignment="CENTER" prefHeight="400.0" spacing="30">
                     <VBox.margin>
-                        <Insets top="5.0" />
+                        <Insets top="5.0"/>
                     </VBox.margin>
 
+                    <!-- TU FLOTA -->
                     <VBox alignment="TOP_CENTER" spacing="5">
                         <Label fx:id="nameLabel" text="Tu Flota" textFill="#87CEEB">
                             <font>
-                                <Font name="System Bold" size="24.0" />
+                                <Font name="System Bold" size="24.0"/>
                             </font>
                             <effect>
-                                <javafx.scene.effect.DropShadow color="#000000" radius="2" />
+                                <DropShadow color="#000000" radius="2"/>
                             </effect>
                         </Label>
 
                         <HBox alignment="CENTER">
-                            <AnchorPane fx:id="rowsPane" prefHeight="300.0" prefWidth="30.0" />
+                            <AnchorPane fx:id="rowsPane" prefHeight="300.0" prefWidth="30.0"/>
                             <VBox>
-                                <AnchorPane fx:id="columnsPane" prefHeight="30.0" prefWidth="300.0" />
-                                <AnchorPane fx:id="panePosition" prefHeight="300.0" prefWidth="300.0" style="-fx-background-color: rgba(10, 30, 60, 0.85); -fx-border-color: #5F9EA0; -fx-border-width: 2; -fx-border-radius: 3; -fx-background-radius: 3;" />
+                                <AnchorPane fx:id="columnsPane" prefHeight="30.0" prefWidth="300.0"/>
+                                <AnchorPane fx:id="panePosition" prefHeight="300.0" prefWidth="300.0"
+                                            style="-fx-background-color: rgba(10, 30, 60, 0.85);
+                                                   -fx-border-color: #5F9EA0;
+                                                   -fx-border-width: 2;
+                                                   -fx-border-radius: 3;
+                                                   -fx-background-radius: 3;"/>
                             </VBox>
                         </HBox>
                     </VBox>
 
+                    <!-- LEYENDA + BOTÓN -->
                     <VBox alignment="CENTER" prefWidth="180.0" spacing="15">
                         <HBox alignment="CENTER" spacing="10">
                             <StackPane prefHeight="35.0" prefWidth="35.0">
-                                <Circle fill="#FFA500" radius="14" stroke="#FFD700" strokeWidth="2" />
+                                <Circle fill="#FFA500" radius="14" stroke="#FFD700" strokeWidth="2"/>
                             </StackPane>
                             <Label text="Tocado" textFill="WHITE">
                                 <font>
-                                    <Font name="System Bold" size="16.0" />
+                                    <Font name="System Bold" size="16.0"/>
                                 </font>
                             </Label>
                         </HBox>
@@ -73,55 +88,73 @@
                             <StackPane prefHeight="35.0" prefWidth="35.0" style="-fx-background-color: #4a9eff;">
                                 <Label text="X" textFill="WHITE">
                                     <font>
-                                        <Font name="System Bold" size="18.0" />
+                                        <Font name="System Bold" size="18.0"/>
                                     </font>
                                 </Label>
                             </StackPane>
                             <Label text="Agua" textFill="WHITE">
                                 <font>
-                                    <Font name="System Bold" size="16.0" />
+                                    <Font name="System Bold" size="16.0"/>
                                 </font>
                             </Label>
                         </HBox>
 
                         <HBox alignment="CENTER" spacing="10">
                             <StackPane prefHeight="35.0" prefWidth="35.0">
-                                <Circle fill="#FF4444" radius="14" stroke="#8B0000" strokeWidth="2" />
+                                <Circle fill="#FF4444" radius="14" stroke="#8B0000" strokeWidth="2"/>
                                 <Label text="X" textFill="WHITE">
                                     <font>
-                                        <Font name="System Bold" size="14.0" />
+                                        <Font name="System Bold" size="14.0"/>
                                     </font>
                                 </Label>
                             </StackPane>
                             <Label text="Hundido" textFill="WHITE">
                                 <font>
-                                    <Font name="System Bold" size="16.0" />
+                                    <Font name="System Bold" size="16.0"/>
                                 </font>
                             </Label>
                         </HBox>
 
-                        <Button onAction="#OnActionNewGame" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: linear-gradient(to bottom, #8B0000, #5a0000); -fx-text-fill: #FFD700; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-border-color: #d4af37; -fx-border-width: 2; -fx-border-radius: 8; -fx-cursor: hand;" text="🏴‍☠️ Nuevo Juego">
+                        <Button text="🏴‍☠️ Nuevo Juego"
+                                onAction="#OnActionNewGame"
+                                prefHeight="40.0" prefWidth="150.0"
+                                style="-fx-background-color: linear-gradient(to bottom, #8B0000, #5a0000);
+                                       -fx-text-fill: #FFD700;
+                                       -fx-font-size: 13px;
+                                       -fx-font-weight: bold;
+                                       -fx-background-radius: 8;
+                                       -fx-border-color: #d4af37;
+                                       -fx-border-width: 2;
+                                       -fx-border-radius: 8;
+                                       -fx-cursor: hand;">
                             <VBox.margin>
-                                <Insets top="15.0" />
+                                <Insets top="15.0"/>
                             </VBox.margin>
                         </Button>
                     </VBox>
 
+                    <!-- FLOTA ENEMIGA -->
                     <VBox alignment="TOP_CENTER" spacing="5">
                         <Label text="Flota Enemiga" textFill="#FF6B6B">
                             <font>
-                                <Font name="System Bold" size="24.0" />
+                                <Font name="System Bold" size="24.0"/>
                             </font>
                             <effect>
-                                <javafx.scene.effect.DropShadow color="#000000" radius="2" />
+                                <DropShadow color="#000000" radius="2"/>
                             </effect>
                         </Label>
 
                         <HBox alignment="CENTER">
-                            <AnchorPane fx:id="rowsPaneMachine" prefHeight="300.0" prefWidth="30.0" />
+                            <AnchorPane fx:id="rowsPaneMachine" prefHeight="300.0" prefWidth="30.0"/>
                             <VBox>
-                                <AnchorPane fx:id="columnsPaneMachine" prefHeight="30.0" prefWidth="300.0" />
-                                <AnchorPane fx:id="panePositionMachine" prefHeight="300.0" prefWidth="300.0" style="-fx-background-color: rgba(60, 20, 20, 0.85); -fx-border-color: #8B0000; -fx-border-width: 2; -fx-border-radius: 3; -fx-background-radius: 3; -fx-cursor: crosshair;" />
+                                <AnchorPane fx:id="columnsPaneMachine" prefHeight="30.0" prefWidth="300.0"/>
+                                <AnchorPane fx:id="panePositionMachine" prefHeight="300.0" prefWidth="300.0"
+                                            style="-fx-background-color: rgba(60, 20, 20, 0.85);
+                                                   -fx-border-color: #8B0000;
+                                                   -fx-border-width: 2;
+                                                   -fx-border-radius: 3;
+                                                   -fx-background-radius: 3;
+                                                   -fx-cursor: crosshair;"/>
                             </VBox>
                         </HBox>
                     </VBox>
