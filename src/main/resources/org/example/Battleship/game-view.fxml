@@ -58,7 +58,12 @@
                         </Label>
 
                         <HBox alignment="CENTER">
-                            <AnchorPane fx:id="rowsPane" prefHeight="300.0" prefWidth="30.0"/>
+                            <!-- Panel de filas CON PADDING SUPERIOR -->
+                            <VBox alignment="TOP_CENTER" spacing="0">
+                                <StackPane prefHeight="30.0" prefWidth="30.0" />
+                                <AnchorPane fx:id="rowsPane" prefHeight="300.0" prefWidth="30.0"/>
+                            </VBox>
+
                             <VBox>
                                 <AnchorPane fx:id="columnsPane" prefHeight="30.0" prefWidth="300.0"/>
                                 <AnchorPane fx:id="panePosition" prefHeight="300.0" prefWidth="300.0"
@@ -145,7 +150,12 @@
                         </Label>
 
                         <HBox alignment="CENTER">
-                            <AnchorPane fx:id="rowsPaneMachine" prefHeight="300.0" prefWidth="30.0"/>
+                            <!-- Panel de filas CON PADDING SUPERIOR -->
+                            <VBox alignment="TOP_CENTER" spacing="0">
+                                <StackPane prefHeight="30.0" prefWidth="30.0" />
+                                <AnchorPane fx:id="rowsPaneMachine" prefHeight="300.0" prefWidth="30.0"/>
+                            </VBox>
+
                             <VBox>
                                 <AnchorPane fx:id="columnsPaneMachine" prefHeight="30.0" prefWidth="300.0"/>
                                 <AnchorPane fx:id="panePositionMachine" prefHeight="300.0" prefWidth="300.0"

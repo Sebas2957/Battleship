@@ -9,7 +9,7 @@ import java.io.Serializable;
  *
  * @author Javier Giraldo
  * @author Sebastian Niño
- * @Pablo Arias
+ * @author Pablo Arias
  * @version 1.0
  */
 public class GameState implements Serializable {
