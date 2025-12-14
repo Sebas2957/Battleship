@@ -41,9 +41,10 @@ public class PlacementController {
     @FXML private AnchorPane rowsPane;
     @FXML private TextField textFieldName;
 
+    // Tamaño del tablero en píxeles (400x400)
     private final int GRID_SIZE = 400;
     private final int NUMBERS_CELL = 10;
-    private final int CELL_SIZE = GRID_SIZE / NUMBERS_CELL;
+    private final int CELL_SIZE = GRID_SIZE / NUMBERS_CELL; // 40px por celda
 
     private Matrix playerBoard;
     private Matrix machineBoard;
@@ -66,6 +67,24 @@ public class PlacementController {
     }
 
     /**
+     * Gets the player's board.
+     *
+     * @return Player's Matrix board
+     */
+    public Matrix getPlayerBoard() {
+        return playerBoard;
+    }
+
+    /**
+     * Gets the machine's board.
+     *
+     * @return Machine's Matrix board
+     */
+    public Matrix getMachineBoard() {
+        return machineBoard;
+    }
+
+    /**
      * Shows the placement window.
      */
     public void show() {
@@ -85,6 +104,11 @@ public class PlacementController {
 
         this.drawGrid();
         this.drawShips();
+        // Arregla el error de estiramiento de ultima columna
+        panePosition.setPrefSize(GRID_SIZE, GRID_SIZE);
+        panePosition.setMaxSize(GRID_SIZE, GRID_SIZE);
+        panePosition.setMinSize(GRID_SIZE, GRID_SIZE);
+
         // Arregla el error de estiramiento de ultima columna
         panePosition.setPrefSize(GRID_SIZE, GRID_SIZE);
         panePosition.setMaxSize(GRID_SIZE, GRID_SIZE);
@@ -123,9 +147,11 @@ public class PlacementController {
             this.targetPath = (Path) event.getTarget();
             this.targetShip = (Ship) targetPath.getUserData();
 
+            // Guardar posición inicial del barco
             positionInitialX = (int) (this.targetPath.getLayoutX() / CELL_SIZE);
             positionInitialY = (int) (this.targetPath.getLayoutY() / CELL_SIZE);
 
+            // Remover barco del tablero mientras se arrastra
             playerBoard.removeShip(positionInitialX, positionInitialY, this.targetShip);
             this.targetPath.setStroke(Color.GREEN);
         } catch (Exception ignored) {}
@@ -139,41 +165,44 @@ public class PlacementController {
      */
     public void handleMouseDragged(MouseEvent event) {
         try {
-            int positionX = (int) event.getX();
-            int positionY = (int) event.getY();
-
             isDragging = true;
 
-            // Calcular la celda objetivo (índices i, j)
-            int cellX = positionX / CELL_SIZE;
-            int cellY = positionY / CELL_SIZE;
+            // Obtener posición del mouse
+            double mouseX = event.getX();
+            double mouseY = event.getY();
 
-            // Calcular la posición ajustada a la cuadrícula
-            int positionFixX = cellX * CELL_SIZE;
-            int positionFixY = cellY * CELL_SIZE;
+            // Calcular la celda objetivo
+            int cellX = (int) (mouseX / CELL_SIZE);
+            int cellY = (int) (mouseY / CELL_SIZE);
 
-            // 1. Validar la posición (usando la posición fija)
+            // Obtener dimensiones del barco en celdas
+            int shipWidthCells = targetShip.getWidth();
+            int shipHeightCells = targetShip.getHeight();
+
+            // Limitar las celdas para que el barco no se salga del tablero
+            int maxCellX = NUMBERS_CELL - shipWidthCells;
+            int maxCellY = NUMBERS_CELL - shipHeightCells;
+
+            // Clampear la celda dentro de los límites válidos
+            cellX = Math.max(0, Math.min(cellX, maxCellX));
+            cellY = Math.max(0, Math.min(cellY, maxCellY));
+
+            // Calcular la posición en píxeles (ajustada a la cuadrícula)
+            double newLayoutX = cellX * CELL_SIZE;
+            double newLayoutY = cellY * CELL_SIZE;
+
+            // Validar si la posición es válida (no hay otros barcos)
             movementValid = playerBoard.validatePosition(cellX, cellY, targetShip);
 
-            // 2. Obtener dimensiones del barco en píxeles
-            // Nota: Se utiliza getWidth/getHeight de Ship que manejan la rotación
-            int shipWidth = targetShip.getWidth() * CELL_SIZE;
-            int shipHeight = targetShip.getHeight() * CELL_SIZE;
-
-            // 3. Limitar (clampear) la posición fija para que el barco no se salga del AnchorPane (400x400)
-            // Esto asegura que el barco siempre esté visible, independientemente de la validez.
-            double newLayoutX = Math.max(0, Math.min(positionFixX, GRID_SIZE - shipWidth));
-            double newLayoutY = Math.max(0, Math.min(positionFixY, GRID_SIZE - shipHeight));
-
-            // 4. Aplicar posición y coloreado
+            // Aplicar posición
             this.targetPath.setLayoutX(newLayoutX);
             this.targetPath.setLayoutY(newLayoutY);
 
+            // Colorear según validez
             if (movementValid) {
                 this.targetPath.setStroke(Color.web("#40bf44"));
                 this.targetPath.setFill(Color.rgb(64, 191, 68, 0.05));
             } else {
-                // Barco rojo cuando no es una posición válida
                 this.targetPath.setStroke(Color.web("#f00"));
                 this.targetPath.setFill(Color.rgb(255, 0, 0, 0.05));
             }
@@ -193,21 +222,25 @@ public class PlacementController {
             this.targetPath.setFill(Color.rgb(255, 0, 0, 0.05));
 
             if (isDragging) {
+                // Se estaba arrastrando el barco
                 int positionX = (int) (this.targetPath.getLayoutX() / CELL_SIZE);
                 int positionY = (int) (this.targetPath.getLayoutY() / CELL_SIZE);
 
                 if (movementValid) {
+                    // Actualizar posición del barco
                     this.targetShip.setTailX(positionX);
                     this.targetShip.setTailY(positionY);
                 } else {
+                    // Volver a la posición inicial si no es válida
                     this.targetPath.setLayoutX(positionInitialX * CELL_SIZE);
                     this.targetPath.setLayoutY(positionInitialY * CELL_SIZE);
                 }
             } else {
-                // Rotar el barco al hacer clic
+                // Se hizo clic sin arrastrar - rotar el barco
                 playerBoard.removeShip(this.targetShip.getTailX(), this.targetShip.getTailY(), this.targetShip);
                 this.targetShip.rotate();
 
+                // Validar si la rotación es válida
                 movementValid = playerBoard.validatePosition(
                         this.targetShip.getTailX(),
                         this.targetShip.getTailY(),
@@ -215,6 +248,7 @@ public class PlacementController {
                 );
 
                 if (movementValid) {
+                    // Aplicar rotación visual
                     if (targetShip.getDirection() == Ship.Direction.VERTICAL) {
                         Rotate rotate = new Rotate(90, 20, 20);
                         targetPath.getTransforms().add(rotate);
@@ -223,12 +257,15 @@ public class PlacementController {
                         targetPath.getTransforms().add(rotate);
                     }
                 } else {
+                    // Si la rotación no es válida, revertirla
                     this.targetShip.rotate();
                 }
             }
 
+            // Colocar el barco en su posición final
             playerBoard.putShip(this.targetShip.getTailX(), this.targetShip.getTailY(), this.targetShip);
 
+            // Limpiar referencias
             this.targetPath = null;
             this.targetShip = null;
             this.isDragging = false;
@@ -241,6 +278,7 @@ public class PlacementController {
     public void drawGrid() {
         Line line;
 
+        // Dibujar líneas de la cuadrícula
         for (int i = 0; i <= NUMBERS_CELL; i++) {
             line = new Line(0, i * CELL_SIZE, GRID_SIZE, i * CELL_SIZE);
             line.setStroke(Color.web("#b4b4ff"));
@@ -262,9 +300,8 @@ public class PlacementController {
             label = new Label(String.valueOf(letter));
             label.setPrefSize(40, 40);
             label.setAlignment(Pos.CENTER);
-            label.setStyle("-fx-font-size: 18px;");
+            label.setStyle("-fx-font-size: 18px; -fx-text-fill: white;");
 
-            // La etiqueta 'A' (i=0) debe empezar en la posición 0.0 de columnsPane
             AnchorPane.setLeftAnchor((Node) label, (double) (i * CELL_SIZE));
             AnchorPane.setTopAnchor(label, 0.0);
             columnsPane.getChildren().add(label);
@@ -273,11 +310,10 @@ public class PlacementController {
             label = new Label(String.valueOf(i + 1));
             label.setPrefSize(40, 40);
             label.setAlignment(Pos.CENTER);
-            label.setStyle("-fx-font-size: 18px;");
+            label.setStyle("-fx-font-size: 18px; -fx-text-fill: white;");
 
-            // Desplazamiento vertical para dejar espacio a las letras (ESTO SE MANTIENE CORRECTO)
             AnchorPane.setRightAnchor(label, 0.0);
-            AnchorPane.setTopAnchor((Node) label, (double) ((i + 1) * CELL_SIZE));
+            AnchorPane.setTopAnchor((Node) label, (double) (i * CELL_SIZE));
             rowsPane.getChildren().add(label);
         }
     }
@@ -296,15 +332,16 @@ public class PlacementController {
             path.setLayoutX(ship.getTailX() * CELL_SIZE);
             path.setLayoutY(ship.getTailY() * CELL_SIZE);
             path.setStrokeWidth(2);
-            // Color de barco inicial (Rojo)
             path.setStroke(Color.web("#f00"));
             path.setFill(Color.rgb(255, 0, 0, 0.05));
 
+            // Rotar si el barco está en vertical
             if (ship.getDirection() == Ship.Direction.VERTICAL) {
                 Rotate rotate = new Rotate(90, 20, 20);
                 path.getTransforms().add(rotate);
             }
 
+            // Guardar referencia del barco en el Path
             path.setUserData(ship);
             panePosition.getChildren().add(path);
         }
@@ -322,15 +359,16 @@ public class PlacementController {
         AlertBox alertBox = new AlertBox();
         boolean confirmed = alertBox.showConfirmation(
                 "Confirmación",
-                "¿Estás seguro que quieres ver ambos tableros?"
+                "¿Estás seguro que quieres ver ambos tableros?\n" +
+                        "(Solo para verificación)"
         );
 
         if (confirmed) {
             try {
                 playerBoard.setUsername(textFieldName.getText());
+                // Mostrar MachineView sin cerrar PlacementView
                 MachineView machineView = new MachineView(machineBoard, playerBoard);
                 machineView.show();
-                ((Stage) panePosition.getScene().getWindow()).close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -362,6 +400,7 @@ public class PlacementController {
                 serialization.serializeObjects("objectsSerialization.txt", machineBoard, playerBoard);
                 serialization.savePlayerStats(playerBoard.getUsername(), 0, 0);
 
+                // Abrir vista de juego y cerrar esta ventana
                 GameView gameView = new GameView(machineBoard, playerBoard);
                 gameView.show();
                 ((Stage) panePosition.getScene().getWindow()).close();
