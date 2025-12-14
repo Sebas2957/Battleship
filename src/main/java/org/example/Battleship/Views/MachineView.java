@@ -14,12 +14,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Path;
 import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 
 /**
- * View for displaying the machine's board for verification purposes.
+ * View for displaying both boards for verification purposes.
  * Only available before starting the game.
  *
  * @author Javier Giraldo
@@ -32,9 +33,10 @@ public class MachineView {
     private Matrix machineBoard;
     private Matrix playerBoard;
 
+    // Tableros de 300x300 para visualización
     private final int GRID_SIZE = 300;
     private final int NUMBERS_CELL = 10;
-    private final int CELL_SIZE = GRID_SIZE / NUMBERS_CELL;
+    private final int CELL_SIZE = GRID_SIZE / NUMBERS_CELL; // 30px
 
     /**
      * Constructor that creates the verification view.
@@ -68,7 +70,7 @@ public class MachineView {
         Label title = new Label("VERIFICACIÓN DE TABLEROS");
         title.setStyle("-fx-text-fill: #00d4ff; -fx-font-size: 24px; -fx-font-weight: bold;");
 
-        Label subtitle = new Label("Vista solo para verificación");
+        Label subtitle = new Label("Vista solo para verificación - Regresarás a la pantalla de colocación");
         subtitle.setStyle("-fx-text-fill: #888888; -fx-font-size: 12px;");
 
         // Contenedor de tableros
@@ -83,7 +85,7 @@ public class MachineView {
 
         boardsContainer.getChildren().addAll(playerContainer, machineContainer);
 
-        // Botón cerrar
+        // Botón cerrar - solo cierra esta ventana
         Button closeButton = new Button("✓ CERRAR Y CONTINUAR");
         closeButton.setStyle("-fx-background-color: #e94560; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10 30; -fx-background-radius: 8; -fx-cursor: hand;");
         closeButton.setOnAction(e -> stage.close());
@@ -152,10 +154,8 @@ public class MachineView {
             Ship ship = board.getShip(i);
             Path path = ship.getDraw();
 
-            // Escalar el barco para el tamaño reducido
-            double scale = 0.75;
-            path.setScaleX(scale);
-            path.setScaleY(scale);
+            // Escalar el barco de 40px a 30px (factor 0.75)
+            path.getTransforms().add(new Scale(0.75, 0.75));
 
             path.setLayoutX(ship.getTailX() * CELL_SIZE);
             path.setLayoutY(ship.getTailY() * CELL_SIZE);
@@ -163,6 +163,7 @@ public class MachineView {
             path.setStroke(Color.web("#00d4ff"));
             path.setFill(Color.rgb(0, 212, 255, 0.1));
 
+            // Rotar si el barco está en vertical
             if (ship.getDirection() == Ship.Direction.VERTICAL) {
                 Rotate rotate = new Rotate(90, 15, 15);
                 path.getTransforms().add(rotate);
@@ -177,5 +178,6 @@ public class MachineView {
      */
     public void show() {
         stage.show();
+        stage.centerOnScreen();
     }
 }
