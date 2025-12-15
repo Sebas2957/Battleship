@@ -3,6 +3,8 @@ package org.example.Battleship.Controllers;
 import org.example.Battleship.Models.Game;
 import org.example.Battleship.Models.Matrix;
 import org.example.Battleship.Models.Ship;
+import org.example.Battleship.Models.exceptions.InvalidShotException;
+import org.example.Battleship.Models.structures.ShotQueue;
 import org.example.Battleship.Models.utilities.serialization;
 import org.example.Battleship.Views.InformationView;
 import org.example.Battleship.Views.AlertBox;
@@ -44,6 +46,8 @@ public class GameController {
     @FXML private Label informationLabel;
     @FXML private Label nameLabel;
 
+    private ShotQueue playerShotHistory;
+    private ShotQueue machineShotHistory;
     private Matrix machineBoard;
     private Matrix playerBoard;
     private serialization serialization;
@@ -71,6 +75,10 @@ public class GameController {
         this.playerBoard = playerBoard;
         game = new Game();
         serialization = new serialization();
+
+        // Inicializar historial de disparos
+        playerShotHistory = new ShotQueue();
+        machineShotHistory = new ShotQueue();
 
         // Fijar tamaño de ambos tableros para evitar expansión
         panePosition.setPrefSize(GRID_SIZE, GRID_SIZE);
@@ -127,66 +135,86 @@ public class GameController {
      * @param event Mouse event
      */
     public void handleMousePressed(MouseEvent event) {
-        // Verificar que sea turno del jugador (turno par)
-        if (game.getTurn() % 2 != 0) {
-            return;
-        }
+        try {
+            // Verificar que sea turno del jugador (turno par)
+            if (game.getTurn() % 2 != 0) {
+                throw new InvalidShotException("No es tu turno. Espera a que la máquina termine.");
+            }
 
-        int x = (int) event.getX() / CELL_SIZE;
-        int y = (int) event.getY() / CELL_SIZE;
+            int x = (int) event.getX() / CELL_SIZE;
+            int y = (int) event.getY() / CELL_SIZE;
 
-        // Validar límites del tablero
-        if (x < 0 || x >= 10 || y < 0 || y >= 10) {
-            return;
-        }
+            // Validar límites del tablero
+            if (x < 0 || x >= 10 || y < 0 || y >= 10) {
+                throw new InvalidShotException("Disparo fuera del tablero en (" + x + ", " + y + ")");
+            }
 
-        // Validar que no se dispare en la misma casilla
-        if (machineBoard.isWaterHitOrSunk(x, y)) {
+            // Validar que no se dispare en la misma casilla
+            if (machineBoard.isWaterHitOrSunk(x, y)) {
+                throw new InvalidShotException("Ya disparaste en (" + x + ", " + y + ")");
+            }
+
+            // Procesar disparo según el estado de la casilla
+            if (machineBoard.getState(x, y) == Matrix.State.EMPTY) {
+                // Disparo al agua - cambiar turno
+                game.setTurn();
+                machineBoard.changeState(x, y, Matrix.State.WATER);
+
+                // Registrar disparo en el historial
+                playerShotHistory.addShot(x, y, true, "WATER"); // true = jugador, WATER = agua
+
+                Path waterHit = drawWaterHit();
+                waterHit.setLayoutX(x * CELL_SIZE);
+                waterHit.setLayoutY(y * CELL_SIZE);
+                panePositionMachine.getChildren().add(waterHit);
+
+                updateTurnLabel();
+                saveGameState();
+
+                // Turno de la máquina
+                machineTurn();
+
+            } else if (machineBoard.getState(x, y) == Matrix.State.OCCUPIED) {
+                // Tocado - el jugador vuelve a disparar
+                machineBoard.updateShipStateToHit(x, y);
+
+                // Registrar disparo en el historial
+                playerShotHistory.addShot(x, y, true, "HIT"); // true = jugador, HIT = tocado
+
+                machineBoard.updateAndCheckShipStateToSunk();
+
+                informationLabel.setText("¡Has hundido " + machineBoard.getSunkShips() + " barcos enemigos!");
+                updateTurnLabel();
+
+                // Redibujar el tablero con los nuevos estados
+                redrawMachineBoard();
+                saveGameState();
+
+                // Verificar victoria
+                if (machineBoard.allShipsSunk()) {
+                    handleGameEnd(true);
+                }
+            }
+
+        } catch (InvalidShotException e) {
+            // Manejar excepción de disparo inválido
             new AlertBox().showAlert(
                     "Error",
                     "Disparo inválido",
-                    "No puedes disparar 2 veces en el mismo lugar",
+                    e.getMessage(),
                     Alert.AlertType.ERROR
             );
-            return;
-        }
 
-        // Procesar disparo según el estado de la casilla
-        if (machineBoard.getState(x, y) == Matrix.State.EMPTY) {
-            // Disparo al agua - cambiar turno
-            game.setTurn();
-            machineBoard.changeState(x, y, Matrix.State.WATER);
-
-            Path waterHit = drawWaterHit();
-            waterHit.setLayoutX(x * CELL_SIZE);
-            waterHit.setLayoutY(y * CELL_SIZE);
-            panePositionMachine.getChildren().add(waterHit);
-
-            updateTurnLabel();
-            saveGameState();
-
-            // Turno de la máquina
-            machineTurn();
-
-        } else if (machineBoard.getState(x, y) == Matrix.State.OCCUPIED) {
-            // Tocado - el jugador vuelve a disparar
-            machineBoard.updateShipStateToHit(x, y);
-            machineBoard.updateAndCheckShipStateToSunk();
-
-            informationLabel.setText("¡Has hundido " + machineBoard.getSunkShips() + " barcos enemigos!");
-            updateTurnLabel();
-
-            // Redibujar el tablero con los nuevos estados
-            redrawMachineBoard();
-            saveGameState();
-
-            // Verificar victoria
-            if (machineBoard.allShipsSunk()) {
-                handleGameEnd(true);
-            }
+        } catch (Exception e) {
+            // Manejar cualquier otra excepción
+            System.err.println("Error inesperado: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
+    /**
+     * Executes the machine's turn with random shots.
+     */
     /**
      * Executes the machine's turn with random shots.
      */
@@ -202,22 +230,33 @@ public class GameController {
                 z = new Random().nextInt(10);
             } while (playerBoard.isWaterHitOrSunk(w, z));
 
-            if (playerBoard.getState(w, z) == Matrix.State.EMPTY) {
+            // Hacer las variables efectivamente finales para usar en el resto del código
+            final int finalW = w;
+            final int finalZ = z;
+
+            if (playerBoard.getState(finalW, finalZ) == Matrix.State.EMPTY) {
                 // Disparo al agua - cambiar turno
                 game.setTurn();
-                playerBoard.changeState(w, z, Matrix.State.WATER);
+                playerBoard.changeState(finalW, finalZ, Matrix.State.WATER);
+
+                // Registrar disparo de la máquina
+                machineShotHistory.addShot(finalW, finalZ, false, "WATER"); // false = máquina
 
                 Path waterHit = drawWaterHit();
-                waterHit.setLayoutX(w * CELL_SIZE);
-                waterHit.setLayoutY(z * CELL_SIZE);
+                waterHit.setLayoutX(finalW * CELL_SIZE);
+                waterHit.setLayoutY(finalZ * CELL_SIZE);
                 panePosition.getChildren().add(waterHit);
 
                 updateTurnLabel();
                 saveGameState();
 
-            } else if (playerBoard.getState(w, z) == Matrix.State.OCCUPIED) {
+            } else if (playerBoard.getState(finalW, finalZ) == Matrix.State.OCCUPIED) {
                 // Tocado - la máquina vuelve a disparar
-                playerBoard.updateShipStateToHit(w, z);
+                playerBoard.updateShipStateToHit(finalW, finalZ);
+
+                // Registrar disparo de la máquina
+                machineShotHistory.addShot(finalW, finalZ, false, "HIT"); // false = máquina
+
                 playerBoard.updateAndCheckShipStateToSunk();
 
                 updateTurnLabel();

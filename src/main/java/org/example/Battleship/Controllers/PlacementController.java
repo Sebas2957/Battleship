@@ -3,6 +3,7 @@ package org.example.Battleship.Controllers;
 import javafx.scene.Node;
 import org.example.Battleship.Models.Matrix;
 import org.example.Battleship.Models.Ship;
+import org.example.Battleship.Models.exceptions.InvalidPositionException;
 import org.example.Battleship.Views.GameView;
 import org.example.Battleship.Views.MachineView;
 import org.example.Battleship.Views.AlertBox;
@@ -188,7 +189,15 @@ public class PlacementController {
             double newLayoutY = cellY * CELL_SIZE;
 
             // Validar si la posición es válida (no hay otros barcos)
-            movementValid = playerBoard.validatePosition(cellX, cellY, targetShip);
+            try {
+                movementValid = playerBoard.validatePosition(cellX, cellY, targetShip);
+                if (!movementValid) {
+                    throw new InvalidPositionException("Posición inválida para barco en (" + cellX + ", " + cellY + ")");
+                }
+            } catch (InvalidPositionException e) {
+                movementValid = false;
+                System.err.println("Excepción capturada: " + e.getMessage());
+            }
 
             // Aplicar posición
             this.targetPath.setLayoutX(newLayoutX);
