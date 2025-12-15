@@ -1,6 +1,6 @@
 ESTADÍSTICAS DEL JUEGO
 ======================
-Jugador: das
-Barcos hundidos del jugador: 0
-Barcos hundidos de la máquina: 0
+Jugador: as
+Barcos hundidos del jugador: 1
+Barcos hundidos de la máquina: 1
 Total de barcos: 10
